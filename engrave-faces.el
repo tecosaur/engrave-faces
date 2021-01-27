@@ -135,7 +135,9 @@ output.")
                           (delq nil
                                 (delq 'unspecified
                                       (mapcar (lambda (face)
-                                                (face-attribute face attr nil t))
+                                                (or
+                                                 (plist-get (cdr (assoc face engrave-faces-preset-styles)) attr)
+                                                 (face-attribute face attr nil t)))
                                               (delq 'default (if (listp faces) faces (list faces)))))))))
                  engrave-faces-attributes-of-interest)))
 
