@@ -36,7 +36,9 @@
 
 ;;; Code:
 
+;;;###autoload
 (defvar engrave-faces--backends nil)
+;;;###autoload
 (defmacro engrave-faces-define-backend (name extension face-transformer)
   `(progn (add-to-list 'engrave-faces--backends
                        (list ,name :face-transformer ,face-transformer :extension ,extension))

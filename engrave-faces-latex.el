@@ -42,7 +42,7 @@
 
 (defun engrave-faces-latex-face-apply (faces content)
   "TODO"
-  (let ((attrs (engrave-face-merge-attributes faces)))
+  (let ((attrs (engrave-faces-merge-attributes faces)))
     (let ((fg (plist-get attrs :foreground))
           (bg (plist-get attrs :background))
           (it (eql (plist-get attrs :slant) 'italic))
@@ -85,9 +85,11 @@
   (while (search-forward "\n}" nil t)
     (replace-match "}\n")))
 
+;;;###autoload
 (engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper)
 (add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex-post-processing)
 
+;;;###autoload
 (defun engrave-faces-latex-buffer-standalone ()
   "Export current buffer to a standalone LaTeX buffer."
   (interactive)
