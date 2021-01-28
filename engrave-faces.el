@@ -8,7 +8,7 @@
 ;; Modified: January 18, 2021
 ;; Version: 0.0.1
 ;; Keywords: faces
-;; Homepage: https://github.com/tec/engrave-faces
+;; Homepage: https://github.com/tecosaur/engrave-faces
 ;; Package-Requires: ((emacs "27.1"))
 
 ;;; License:
