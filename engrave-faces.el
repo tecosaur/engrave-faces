@@ -114,8 +114,12 @@ output.")
               ;; happens in invisible regions).
               (when (> (length text) 0)
                 (princ (funcall face-transformer
-                                (or (get-text-property (point) 'face)
-                                    'default)
+                                (let ((prop (get-text-property (point) 'face)))
+                                  (cond
+                                   ((null prop) 'default)
+                                   ((and (listp prop)
+                                         (eq (car prop) 'quote)) (eval prop))
+                                   ((listp prop) prop)))
                                 text)
                        engraved-buf))
               (goto-char next-change)))
@@ -135,9 +139,10 @@ output.")
                           (delq nil
                                 (delq 'unspecified
                                       (mapcar (lambda (face)
-                                                (or
-                                                 (plist-get (cdr (assoc face engrave-faces-preset-styles)) attr)
-                                                 (face-attribute face attr nil t)))
+                                                (or (plist-get (cdr (assoc face engrave-faces-preset-styles)) attr)
+                                                    (cond
+                                                     ((symbolp face) (face-attribute face attr nil t))
+                                                     ((listp face) (plist-get face attr)))))
                                               (delq 'default (if (listp faces) faces (list faces)))))))))
                  engrave-faces-attributes-of-interest)))
 
