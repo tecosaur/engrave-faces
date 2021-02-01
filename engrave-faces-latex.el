@@ -28,6 +28,7 @@
   (let ((short (plist-get style         :slug))
         (fg    (plist-get style         :foreground))
         (bg    (plist-get style         :background))
+        (st    (plist-get style         :strike-through))
         (it    (eql (plist-get style    :slant) 'italic))
         (bl    (member (plist-get style :weight) '(bold extra-bold))))
     (concat (when fg (format "\\definecolor{EF%s}{HTML}{%s}\n" short (substring fg 1)))
@@ -35,24 +36,25 @@
             "\\newcommand{\\EF" short "}[1]{"
             (when bg (concat "\\colorbox{Ef" short "}{"))
             (when fg (concat "\\textcolor{EF" short "}{"))
-            (when bl "\\textbf{") (when it "\\textit{")
+            (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
             "#1}"
-            (when bg "}") (when fg "}") (when bl "}") (when it "}")
+            (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")
             " % " (symbol-name face))))
 
 (defun engrave-faces-latex-face-apply (faces content)
   "TODO"
   (let ((attrs (engrave-faces-merge-attributes faces)))
-    (let ((fg (plist-get attrs :foreground))
-          (bg (plist-get attrs :background))
-          (it (eql (plist-get attrs :slant) 'italic))
-          (bl (member (plist-get attrs :weight) '(bold extra-bold))))
+    (let ((bg (plist-get attrs         :background))
+          (fg (plist-get attrs         :foreground))
+          (it (eql (plist-get attrs    :slant) 'italic))
+          (bl (member (plist-get attrs :weight) '(bold extra-bold)))
+          (st (plist-get attrs         :strike-through)))
       (concat
        (when bg (concat "\\colorbox[HTML]{" (substring bg 1) "}{"))
        (when fg (concat "\\textcolor[HTML]{" (substring fg 1) "}{"))
-       (when bl "\\textbf{") (when it "\\textit{")
+       (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
        content
-       (when bg "}") (when fg "}") (when bl "}") (when it "}")))))
+       (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")))))
 
 (defun engrave-faces-latex-face-mapper (faces content)
   "TODO"

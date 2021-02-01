@@ -59,7 +59,7 @@
       (kill-buffer engraved-buf))))
 
 (defvar engrave-faces-attributes-of-interest
-  '(:foreground :background :slant :weight :height)
+  '(:foreground :background :slant :weight :height :strike-through)
   "Attributes which sould be paid attention to.")
 
 (defvar engrave-faces-before-hook nil
