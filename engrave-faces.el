@@ -43,20 +43,10 @@
   `(progn (add-to-list 'engrave-faces--backends
                        (list ,name :face-transformer ,face-transformer :extension ,extension))
           (defun ,(intern (concat "engrave-faces-" name "-buffer")) ()
-            (concat "Convert buffer to " ,name " formatting")
+            ,(concat "Convert buffer to " name " formatting")
             (engrave-faces-buffer-1 ,name))
           (defvar ,(intern (concat "engrave-faces-" name "-before-hook")) nil)
           (defvar ,(intern (concat "engrave-faces-" name "-after-hook")) nil)))
-
-(defun engrave-faces-region-for-paste (beg end)
-  "Convert the region between BEG and END to ANSI."
-  (let ((engraved-buf (save-restriction
-                        (narrow-to-region beg end)
-                        (engrave-faces-buffer-1))))
-    (unwind-protect
-        (with-current-buffer engraved-buf
-          (buffer-string))
-      (kill-buffer engraved-buf))))
 
 (defvar engrave-faces-attributes-of-interest
   '(:foreground :background :slant :weight :height :strike-through)
