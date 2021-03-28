@@ -123,7 +123,7 @@ output.")
 
 (defun engrave-faces-merge-attributes (faces &optional attributes)
   "Find the final ATTRIBUTES for text with FACES."
-  (setq faces (engrave-faces-explicit-inheritance faces))
+  (setq faces (engrave-faces-explicit-inheritance (if (listp faces) faces (list faces))))
   (apply #'append
          (mapcar (lambda (attr)
                    (list attr (car (engrave-faces-attribute-values faces attr))))
