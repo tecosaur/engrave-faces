@@ -121,20 +121,36 @@ output.")
           (run-hooks (intern (concat "engrave-faces-" backend "-after-hook"))))
         engraved-buf))))
 
-(defun engrave-faces-merge-attributes (faces)
+(defun engrave-faces-merge-attributes (faces &optional attributes)
+  "Find the final ATTRIBUTES for text with FACES."
+  (setq faces (engrave-faces-explicit-inheritance faces))
   (apply #'append
          (mapcar (lambda (attr)
-                   (list attr
-                         (car
-                          (delq nil
-                                (delq 'unspecified
-                                      (mapcar (lambda (face)
-                                                (or (plist-get (cdr (assoc face engrave-faces-preset-styles)) attr)
-                                                    (cond
-                                                     ((symbolp face) (face-attribute face attr nil t))
-                                                     ((listp face) (plist-get face attr)))))
-                                              (delq 'default (if (listp faces) faces (list faces)))))))))
-                 engrave-faces-attributes-of-interest)))
+                   (list attr (car (engrave-faces-attribute-values faces attr))))
+                 (or attributes engrave-faces-attributes-of-interest))))
+
+(defun engrave-faces-explicit-inheritance (faces)
+  "Expand :inherit for each face in FACES.
+I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
+  (apply #'append (mapcar
+                   (lambda (face)
+                     (cons face
+                           (let ((inherit (face-attribute face :inherit nil nil)))
+                             (when (and inherit (not (eq inherit 'unspecified)))
+                               (engrave-faces-explicit-inheritance (list inherit))))))
+                   faces)))
+
+(defun engrave-faces-attribute-values (faces attribute)
+  "Fetch all specified instances of ATTRIBUTE for FACES, ignoring inheritence.
+To consider inheritence, use `engrave-faces-explicit-inheritance' first."
+  (delq nil (delq 'unspecified
+                  (mapcar
+                   (lambda (face)
+                     (or (plist-get (cdr (assoc face engrave-faces-preset-styles)) attribute)
+                         (cond
+                          ((symbolp face) (face-attribute face attribute nil nil))
+                          ((listp face) (plist-get face attribute)))))
+                   (delq 'default (if (listp faces) faces (list faces)))))))
 
 (defun engrave-faces-next-face-change (pos &optional limit)
   ;; (engrave-faces-next-change pos 'face limit) would skip over entire
