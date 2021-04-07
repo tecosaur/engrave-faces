@@ -16,13 +16,11 @@
 
 (defun engrave-faces-latex-gen-preamble ()
   "TODO"
-  (concat
-   "\\definecolor{EFD}{HTML}{" (substring (plist-get engrave-faces-preset-default :foreground) 1) "}\n"
-   (mapconcat
-    (lambda (face-style)
-      (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
-    engrave-faces-preset-styles
-    "\n")))
+  (mapconcat
+   (lambda (face-style)
+     (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
+   engrave-faces-preset-styles
+   "\n"))
 
 (defun engrave-faces-latex-gen-preamble-line (face style)
   (let ((short (plist-get style         :slug))
@@ -59,7 +57,7 @@
 (defun engrave-faces-latex-face-mapper (faces content)
   "TODO"
   (let ((protected-content (replace-regexp-in-string "[\\{}$%&_#]" "\\\\\\&" content))
-        (style (assoc faces engrave-faces-preset-styles)))
+        (style (unless (eq faces 'default) (assoc faces engrave-faces-preset-styles))))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
       (if (and style (eq engrave-faces-latex-output-style 'preset))
@@ -76,7 +74,7 @@
   (insert (if (eq engrave-faces-latex-output-style 'preset)
               "\\color{EFD}"
             (concat "\\color[HTML]{"
-                    (substring (plist-get (assoc 'default engrave-faces-preset-styles)
+                    (substring (plist-get (cdr (assoc 'default engrave-faces-preset-styles))
                                           :foreground) 1)
                     "}")))
   (dolist (find-sub engrave-faces-latex-char-replacements)

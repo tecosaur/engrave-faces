@@ -178,7 +178,8 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
 ;;; Style helpers
 
 (defvar engrave-faces-preset-styles ; doom-one-light
-  '((font-lock-keyword-face              :short "keyword"          :slug "k"     :foreground "#e45649")
+  '((default                             :short "default"          :slug "D"     :foreground "#383a42")
+    (font-lock-keyword-face              :short "keyword"          :slug "k"     :foreground "#e45649")
     (font-lock-doc-face                  :short "doc"              :slug "d"     :foreground "#84888b" :slant italic)
     (font-lock-type-face                 :short "type"             :slug "t"     :foreground "#986801")
     (font-lock-string-face               :short "string"           :slug "s"     :foreground "#50a14f")
@@ -207,9 +208,6 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
     (rainbow-delimiters-depth-9-face     :short "rd9"              :slug "rdix"  :foreground "#887070"))
   "TODO")
 
-(defvar engrave-faces-preset-default '(:foreground "#383a42")
-  "TODO")
-
 (defun engrave-faces-check-nondefault (attr value)
   (unless (or (eq value (face-attribute 'default attr nil t))
               (eq value 'unspecified))
@@ -227,7 +225,8 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
                   (mapcar
                    (lambda (attr)
                      (let ((attr-val (face-attribute (car face-style) attr nil t)))
-                       (when (engrave-faces-check-nondefault attr attr-val)
+                       (when (or (engrave-faces-check-nondefault attr attr-val)
+                                 (eq (car face-style) 'default))
                          (list attr attr-val))))
                    engrave-faces-attributes-of-interest))))
    engrave-faces-preset-styles))
