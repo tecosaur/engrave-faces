@@ -71,12 +71,11 @@
 
 (defun engrave-faces-latex-post-processing ()
   (goto-char (point-min))
-  (insert (if (eq engrave-faces-latex-output-style 'preset)
-              "\\color{EFD}"
-            (concat "\\color[HTML]{"
-                    (substring (plist-get (cdr (assoc 'default engrave-faces-preset-styles))
-                                          :foreground) 1)
-                    "}")))
+  (when (eq engrave-faces-latex-output-style 'preset)
+    (insert "\\color[HTML]{"
+            (substring (plist-get (cdr (assoc 'default engrave-faces-preset-styles))
+                                  :foreground) 1)
+            "}"))
   (dolist (find-sub engrave-faces-latex-char-replacements)
     (goto-char (point-min))
     (while (search-forward (car find-sub) nil t)
