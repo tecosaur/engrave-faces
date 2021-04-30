@@ -137,7 +137,8 @@ I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
                      (cons face
                            (let ((inherit (face-attribute face :inherit nil nil)))
                              (when (and inherit (not (eq inherit 'unspecified)))
-                               (engrave-faces-explicit-inheritance (list inherit))))))
+                               (engrave-faces-explicit-inheritance
+                                (if (listp inherit) inherit (list inherit)))))))
                    faces)))
 
 (defun engrave-faces-attribute-values (faces attribute)
