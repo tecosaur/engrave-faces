@@ -36,8 +36,11 @@
 
 ;;; Code:
 
+(require 'map)
+
 ;;;###autoload
 (defvar engrave-faces--backends nil)
+
 ;;;###autoload
 (defmacro engrave-faces-define-backend (name extension face-transformer)
   `(progn (add-to-list 'engrave-faces--backends
@@ -131,14 +134,18 @@ output.")
 (defun engrave-faces-explicit-inheritance (faces)
   "Expand :inherit for each face in FACES.
 I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
-  (apply #'append (mapcar
-                   (lambda (face)
-                     (cons face
-                           (let ((inherit (face-attribute face :inherit nil nil)))
-                             (when (and inherit (not (eq inherit 'unspecified)))
-                               (engrave-faces-explicit-inheritance
-                                (if (listp inherit) inherit (list inherit)))))))
-                   faces)))
+  (delq nil
+        (mapcan
+         (lambda (face)
+           (if (listp face)
+               (let ((inherit (plist-get face :inherit)))
+                 (cons (map-delete face :inherit)
+                       (engrave-faces-explicit-inheritance inherit)))
+             (cons face
+                   (let ((inherit (face-attribute face :inherit nil nil)))
+                     (when (and inherit (not (eq inherit 'unspecified)))
+                       (engrave-faces-explicit-inheritance inherit))))))
+         (if (listp faces) faces (list faces)))))
 
 (defun engrave-faces-attribute-values (faces attribute)
   "Fetch all specified instances of ATTRIBUTE for FACES, ignoring inheritence.
