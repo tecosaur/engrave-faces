@@ -201,6 +201,7 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
     (font-lock-comment-delimiter-face    :short "comment-delim"    :slug "cd"    :foreground "#9ca0a4")
     (font-lock-regexp-grouping-construct :short "regexp"           :slug "rc"    :foreground "#4078f2" :weight bold)
     (font-lock-regexp-grouping-backslash :short "regexp-backslash" :slug "rb"    :foreground "#4078f2" :weight bold)
+    (org-block                           :short "org-block"        :slug "ob") ; forcing no background is preferable
     (highlight-numbers-number            :short "number"           :slug "hn"    :foreground "#da8548" :weight bold)
     (highlight-quoted-quote              :short "qquote"           :slug "hq"    :foreground "#4078f2")
     (highlight-quoted-symbol             :short "qsymbol"          :slug "hs"    :foreground "#986801")
@@ -213,7 +214,15 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
     (rainbow-delimiters-depth-7-face     :short "rd7"              :slug "rdvii" :foreground "#4db5bd")
     (rainbow-delimiters-depth-8-face     :short "rd8"              :slug "rdiix" :foreground "#80a880")
     (rainbow-delimiters-depth-9-face     :short "rd9"              :slug "rdix"  :foreground "#887070"))
-  "TODO")
+  "Overriding face values.
+
+By setting :foreground, :background, etc. a certain theme can be set for
+the faces.  The face attributes here will also be used when calculating
+inherited styles.
+
+Faces here will represented more compactly when possible, by using the
+:short or :slug parameter to produce a named version styles, wheras other
+faces will need to be explicitly styled each time they're used.")
 
 (defun engrave-faces-check-nondefault (attr value)
   (unless (or (eq value (face-attribute 'default attr nil t))
