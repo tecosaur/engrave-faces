@@ -81,8 +81,8 @@
     (while (search-forward (car find-sub) nil t)
       (replace-match (cdr find-sub))))
   (goto-char (point-min))
-  (while (search-forward "\n}" nil t)
-    (replace-match "}\n")))
+  (while (re-search-forward "\n\\([[:space:]]*\\)\\(}+\\)" nil t)
+    (replace-match "\\2\n\\1")))
 
 ;;;###autoload
 (engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper)
