@@ -93,7 +93,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
         (engrave-faces-html-face-apply faces protected-content)))))
 
 (defun engrave-faces-html-make-standalone ()
-  "Export current buffer to a standalone LaTeX buffer."
+  "Export current buffer to a standalone HTML buffer."
   (goto-char (point-min))
   (insert "<!DOCTYPE html>
 <html>

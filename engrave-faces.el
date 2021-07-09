@@ -5,28 +5,28 @@
 ;; Author: TEC <https://github/tecosaur>
 ;; Maintainer: TEC <tec@tecosaur.com>
 ;; Created: January 18, 2021
-;; Modified: January 18, 2021
-;; Version: 0.0.1
+;; Modified: July 10, 2021
+;; Version: 0.1.0
 ;; Keywords: faces
 ;; Homepage: https://github.com/tecosaur/engrave-faces
 ;; Package-Requires: ((emacs "27.1"))
 
 ;;; License:
 
-;; This file is part of org-pandoc-import, which is not part of GNU Emacs.
+;; This file is part of engrave-faces, which is not part of GNU Emacs.
 ;;
-;; org-pandoc-import is free software: you can redistribute it and/or modify
+;; engrave-faces is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 ;;
-;; org-pandoc-import is distributed in the hope that it will be useful,
+;; engrave-faces is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with org-pandoc-import.  If not, see <https://www.gnu.org/licenses/>.
+;; along with engrave-faces.  If not, see <https://www.gnu.org/licenses/>.
 ;;
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -91,9 +91,7 @@ buffer.  You may use them to modify the outlook of the final output."
   :group 'engrave-faces)
 
 (defun engrave-faces-buffer (backend)
-  "Export the current buffer with BACKEND and return the created buffer.
-
-This function is mostly lifted from htmlize."
+  "Export the current buffer with BACKEND and return the created buffer."
   (save-excursion
     ;; Protect against the hook changing the current buffer.
     (save-excursion
