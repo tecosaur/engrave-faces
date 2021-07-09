@@ -20,4 +20,4 @@ I fully expect some important items to have been forgotten.
 *Included backends*
 - [X] LaTeX
 - [ ] HTML
-- [ ] ANSI
+- [X] ANSI
