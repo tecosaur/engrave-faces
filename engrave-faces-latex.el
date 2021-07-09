@@ -91,15 +91,8 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
   (while (re-search-forward "\n\\([[:space:]]*\\)\\(}+\\)" nil t)
     (replace-match "\\2\n\\1")))
 
-;;;###autoload
-(engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper)
-(add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex-post-processing)
-
-;;;###autoload
-(defun engrave-faces-latex-buffer-standalone ()
+(defun engrave-faces-latex-make-standalone ()
   "Export current buffer to a standalone LaTeX buffer."
-  (interactive)
-  (switch-to-buffer (engrave-faces-latex-buffer))
   (goto-char (point-min))
   (insert "\\documentclass{article}
 
@@ -116,6 +109,10 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
   (goto-char (point-max))
   (insert "\\end{Verbatim}
 \\end{document}"))
+
+;;;###autoload
+(engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper #'engrave-faces-latex-make-standalone #'latex-mode)
+(add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex-post-processing)
 
 (provide 'engrave-faces-latex)
 ;;; engrave-faces-latex.el ends here

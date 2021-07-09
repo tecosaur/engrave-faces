@@ -42,12 +42,28 @@
 (defvar engrave-faces--backends nil)
 
 ;;;###autoload
-(defmacro engrave-faces-define-backend (name extension face-transformer)
+(defmacro engrave-faces-define-backend (name extension face-transformer &optional standalone-transformer view-setup)
   `(progn (add-to-list 'engrave-faces--backends
                        (list ,name :face-transformer ,face-transformer :extension ,extension))
-          (defun ,(intern (concat "engrave-faces-" name "-buffer")) ()
-            ,(concat "Convert buffer to " name " formatting")
-            (engrave-faces-buffer-1 ,name))
+          (defun ,(intern (concat "engrave-faces-" name "-buffer")) (&optional switch-to-result)
+            ,(concat "Convert buffer to " name " formatting.")
+            (interactive '(t))
+            (let ((buf (engrave-faces-buffer ,name)))
+              (when switch-to-result
+                (switch-to-buffer buf)
+                ,(when view-setup `(funcall ,view-setup)))
+              buf))
+          ,(when standalone-transformer
+             `(defun ,(intern (concat "engrave-faces-" name "-buffer-standalone")) (&optional switch-to-result)
+                (interactive '(t))
+                ,(concat "Export the current buffer to a standalone " name " buffer.")
+                (let ((buf (engrave-faces-buffer ,name)))
+                  (with-current-buffer buf
+                    (funcall ,standalone-transformer))
+                  (when switch-to-result
+                    (switch-to-buffer buf)
+                    ,(when view-setup `(funcall ,view-setup)))
+                  buf)))
           (defvar ,(intern (concat "engrave-faces-" name "-before-hook")) nil)
           (defvar ,(intern (concat "engrave-faces-" name "-after-hook")) nil)))
 
