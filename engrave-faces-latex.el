@@ -11,11 +11,17 @@
 
 (require 'engrave-faces)
 
-(defvar engrave-faces-latex-output-style 'preset
-  "TODO")
+(defcustom engrave-faces-latex-output-style 'preset
+  "How to encode LaTeX style information.
+When nil, all face properties are applied via \\colorbox, \\textcolor,
+\\textbf, etc. each time.
+When preset, short commands are generated for `engrave-faces-preset-styles'."
+  :type '(choice nil preset)
+  :group 'engrave-faces)
 
 (defun engrave-faces-latex-gen-preamble ()
-  "TODO"
+  "Generate a preamble which provides short commands for the preset styles.
+See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
   (mapconcat
    (lambda (face-style)
      (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
@@ -23,6 +29,7 @@
    "\n"))
 
 (defun engrave-faces-latex-gen-preamble-line (face style)
+  "Generate a LaTeX preamble line for STYLE representing FACE."
   (let ((short (plist-get style         :slug))
         (fg    (plist-get style         :foreground))
         (bg    (plist-get style         :background))
@@ -40,7 +47,7 @@
             " % " (symbol-name face))))
 
 (defun engrave-faces-latex-face-apply (faces content)
-  "TODO"
+  "Convert each (compatable) parameter of FACES to a LaTeX command apllied to CONTENT."
   (let ((attrs (engrave-faces-merge-attributes faces)))
     (let ((bg (plist-get attrs         :background))
           (fg (plist-get attrs         :foreground))
@@ -55,7 +62,7 @@
        (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")))))
 
 (defun engrave-faces-latex-face-mapper (faces content)
-  "TODO"
+  "Create a LaTeX representation of CONTENT With FACES applied."
   (let ((protected-content (replace-regexp-in-string "[\\{}$%&_#]" "\\\\\\&" content))
         (style (unless (eq faces 'default) (assoc faces engrave-faces-preset-styles))))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)

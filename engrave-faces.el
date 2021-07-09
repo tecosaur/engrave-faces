@@ -51,25 +51,33 @@
           (defvar ,(intern (concat "engrave-faces-" name "-before-hook")) nil)
           (defvar ,(intern (concat "engrave-faces-" name "-after-hook")) nil)))
 
-(defvar engrave-faces-attributes-of-interest
+(defgroup engrave-faces nil
+  "Export buffers with font-lock information to other formats."
+  :group 'hypermedia)
+
+(defcustom engrave-faces-attributes-of-interest
   '(:foreground :background :slant :weight :height :strike-through)
-  "Attributes which sould be paid attention to.")
+  "Attributes which sould be paid attention to."
+  :type '(repeat symbol)
+  :group 'engrave-faces)
 
-(defvar engrave-faces-before-hook nil
-  "Hook run before htmlizing a buffer.
-The hook functions are run in the source buffer (not the resulting HTML
-buffer).")
+(defcustom engrave-faces-before-hook nil
+  "Hook run before engraving a buffer.
+The hook functions are run in the source buffer (not the resulting buffer)."
+  :type 'hook
+  :group 'engrave-faces)
 
-(defvar engrave-faces-after-hook nil
-  "Hook run after htmlizing a buffer.
+(defcustom engrave-faces-after-hook nil
+  "Hook run after engraving a buffer.
 Unlike `engrave-faces-before-hook', these functions are run in the generated
-HTML buffer.  You may use them to modify the outlook of the final HTML
-output.")
+buffer.  You may use them to modify the outlook of the final output."
+  :type 'hook
+  :group 'engrave-faces)
 
-(defun engrave-faces-buffer-1 (backend)
-  ;; Internal function; don't call it from outside this file.  Ansify
-  ;; current buffer, writing the resulting ANSI to a new buffer, and
-  ;; return it.
+(defun engrave-faces-buffer (backend)
+  "Export the current buffer with BACKEND and return the created buffer.
+
+This function is mostly lifted from htmlize."
   (save-excursion
     ;; Protect against the hook changing the current buffer.
     (save-excursion
@@ -92,13 +100,13 @@ output.")
           (completed nil))
       (unwind-protect
           (let (next-change text)
-            ;; This loop traverses and reads the source buffer, appending
-            ;; the resulting ANSI to ANSIBUF.  This method is fast
-            ;; because: 1) it doesn't require examining the text
-            ;; properties char by char (engrave-faces-next-face-change is used
-            ;; to move between runs with the same face), and 2) it doesn't
-            ;; require frequent buffer switches, which are slow because
-            ;; they rebind all buffer-local vars.
+            ;; This loop traverses and reads the source buffer, appending the
+            ;; resulting text to the export buffer. This method is fast because:
+            ;; 1) it doesn't require examining the text properties char by char
+            ;; (engrave-faces-next-face-change is used to move between runs with
+            ;; the same face), and 2) it doesn't require frequent buffer
+            ;; switches, which are slow because they rebind all buffer-local
+            ;; vars.
             (goto-char (point-min))
             (while (not (eobp))
               (setq next-change (engrave-faces-next-face-change (point)))
@@ -160,6 +168,9 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
                    (delq 'default (if (listp faces) faces (list faces)))))))
 
 (defun engrave-faces-next-face-change (pos &optional limit)
+  "Find the next face change from POS up to LIMIT.
+
+This function is lifted from htmlize."
   ;; (engrave-faces-next-change pos 'face limit) would skip over entire
   ;; overlays that specify the `face' property, even when they
   ;; contain smaller text properties that also specify `face'.
@@ -184,7 +195,7 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
 
 ;;; Style helpers
 
-(defvar engrave-faces-preset-styles ; doom-one-light
+(defcustom engrave-faces-preset-styles ; doom-one-light
   '((default                             :short "default"          :slug "D"     :foreground "#383a42")
     (font-lock-keyword-face              :short "keyword"          :slug "k"     :foreground "#e45649")
     (font-lock-doc-face                  :short "doc"              :slug "d"     :foreground "#84888b" :slant italic)
@@ -222,9 +233,12 @@ inherited styles.
 
 Faces here will represented more compactly when possible, by using the
 :short or :slug parameter to produce a named version styles, wheras other
-faces will need to be explicitly styled each time they're used.")
+faces will need to be explicitly styled each time they're used."
+  :type '(repeat (repeat (choice symbol string)))
+  :group 'engrave-faces)
 
 (defun engrave-faces-check-nondefault (attr value)
+  "Return VALUE as long as it is specified, and not the default for ATTR."
   (unless (or (eq value (face-attribute 'default attr nil t))
               (eq value 'unspecified))
     value))
