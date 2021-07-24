@@ -104,7 +104,11 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
                                                  (file-name-nondirectory (buffer-file-name))
                                                (buffer-name)))
           "</title>
-    <style>
+    <style>"
+          (if-let ((default-bg (plist-get (cdr (assoc 'default engrave-faces-preset-styles)) :background)))
+              (format "\n      body { background: %s }" default-bg)
+            "")
+          "
       pre {
         font-size: 1rem;
         max-width: min(100rem, 100%);
