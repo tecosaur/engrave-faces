@@ -205,10 +205,11 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
   (delq nil (delq 'unspecified
                   (mapcar
                    (lambda (face)
-                     (or (plist-get (cdr (assoc face engrave-faces-preset-styles)) attribute)
-                         (cond
-                          ((symbolp face) (face-attribute face attribute nil nil))
-                          ((listp face) (plist-get face attribute)))))
+                     (if-let ((style (cdr (assoc face engrave-faces-preset-styles))))
+                         (plist-get style attribute)
+                       (cond
+                        ((symbolp face) (face-attribute face attribute nil nil))
+                        ((listp face) (plist-get face attribute)))))
                    (delq 'default (if (listp faces) faces (list faces)))))))
 
 (defun engrave-faces-next-face-change (pos &optional limit)
