@@ -78,11 +78,10 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
 
 (defun engrave-faces-latex-post-processing ()
   (goto-char (point-min))
-  (when (eq engrave-faces-latex-output-style 'preset)
-    (insert "\\color[HTML]{"
-            (substring (plist-get (cdr (assoc 'default engrave-faces-preset-styles))
-                                  :foreground) 1)
-            "}"))
+  (insert
+   (if (eq engrave-faces-latex-output-style 'preset)
+       (format "\\color{EF%s}" (plist-get (cdr (assoc 'default engrave-faces-preset-styles)) :slug))
+     "\\color[HTML]{" (substring (plist-get (cdr (assoc 'default engrave-faces-preset-styles)) :foreground) 1) "}"))
   (dolist (find-sub engrave-faces-latex-char-replacements)
     (goto-char (point-min))
     (while (search-forward (car find-sub) nil t)
