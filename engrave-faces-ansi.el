@@ -163,6 +163,9 @@ are collateral damage from \"[0m\"."
   (while (re-search-forward "\uE000" nil t)
     (replace-match "\e")))
 
+(declare-function ansi-color-apply-on-region "ansi-color"
+                  (begin end &optional preserve-sequences))
+
 ;;;###autoload
 (engrave-faces-define-backend "ansi" ".txt" #'engrave-faces-ansi-face-apply nil
                               (lambda () (ansi-color-apply-on-region (point-min) (point-max) t)))
