@@ -56,7 +56,8 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
         (st    (plist-get attrs      :strike-through))
         (ul    (plist-get attrs      :underline))
         (it    (eql (plist-get attrs :slant) 'italic))
-        (wt    (plist-get attrs      :weight)))
+        (wt    (plist-get attrs      :weight))
+        (ht    (plist-get attrs      :height)))
     (mapconcat
      #'identity
      (delq nil
@@ -66,8 +67,22 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
             (when st "text-decoration: line-through;")
             (when ul "text-decoration: underline;")
             (when it "text-decoration: italic;")
-            (when wt (format "font-weight: %s;" wt))))
+            (when wt (format "font-weight: %s;" (engrave-faces-html-css-weight wt)))
+            (when (and ht (floatp ht)) (format "font-size: %sem" ht))))
      seperator)))
+
+(defun engrave-faces-html-css-weight (weight)
+  (pcase weight
+    ('ultra-light 100) ('extra-light 100)
+    ('light 200) ('thin 200)
+    ('semi-light 300)
+    ('book 400) ('normal 400) ('regular 400)
+    ('medium 500)
+    ('semi-bold 600) ('demi-bold 600)
+    ('bold 700)
+    ('extra-bold 800)
+    ('heavy 900) ('ultra-bold 900)
+    ('black 950)))
 
 (defun engrave-faces-html-face-apply (faces content)
   (let ((attrs (engrave-faces-merge-attributes faces)))
