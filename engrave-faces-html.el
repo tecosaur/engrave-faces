@@ -123,9 +123,15 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
                                                (buffer-name)))
           "</title>
     <style>"
-          (if-let ((default-bg (plist-get (cdr (assoc 'default engrave-faces-preset-styles)) :background)))
-              (format "\n      body { background: %s }" default-bg)
-            "")
+          (let* ((default-sty (cdr (assoc 'default engrave-faces-preset-styles)))
+                 (default-bg (plist-get default-sty :background))
+                 (default-fg (plist-get default-sty :foreground)))
+            (if (or default-bg default-fg)
+                (concat "\n      body {"
+                        (when default-bg (format " background: %s;" default-bg))
+                        (when default-fg (format " color: %s;" default-fg))
+                        " }")
+              ""))
           "
       pre {
         font-size: 1rem;
