@@ -163,8 +163,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
                                 (let ((prop (get-text-property (point) 'face)))
                                   (cond
                                    ((null prop) 'default)
-                                   ((and (listp prop)
-                                         (eq (car prop) 'quote)) (eval prop))
+                                   ((and (listp prop) (eq (car prop) 'quote))
+                                    (eval prop t))
                                    (t prop)))
                                 text)
                        engraved-buf))
