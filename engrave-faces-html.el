@@ -43,7 +43,8 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
 
 (defun engrave-faces-html-gen-stylesheet-entry (face style)
   "Generate a HTML preamble line for STYLE representing FACE."
-  (concat "." engrave-faces-html-class-prefix (plist-get style :slug)
+  (concat "." engrave-faces-html-class-prefix (or (plist-get style :slug)
+                                                  (symbol-name face))
           " {\n  "
           (engrave-faces-html-gen-style-css style "\n  ")
           " }"))
