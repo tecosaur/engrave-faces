@@ -1,5 +1,7 @@
 ;;; engrave-faces-ansi.el --- Support for engraving buffers to LaTeX -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2021 Free Software Foundation, Inc.
+
 ;; This file is part of engrave-faces.
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 

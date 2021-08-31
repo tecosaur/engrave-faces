@@ -1,6 +1,6 @@
 ;;; engrave-faces.el --- Convert font-lock faces to other formats -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021 TEC
+;; Copyright (C) 2021 Free Software Foundation, Inc.
 
 ;; Author: TEC <https://github/tecosaur>
 ;; Maintainer: TEC <tec@tecosaur.com>
