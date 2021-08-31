@@ -46,21 +46,21 @@
 (defcustom engrave-faces-attributes-of-interest
   '(:foreground :background :slant :weight :height :strike-through)
   "Attributes which sould be paid attention to."
-  :type '(repeat symbol)
-  :group 'engrave-faces)
+  :group 'engrave-faces
+  :type '(repeat symbol))
 
 (defcustom engrave-faces-before-hook nil
   "Hook run before engraving a buffer.
 The hook functions are run in the source buffer (not the resulting buffer)."
-  :type 'hook
-  :group 'engrave-faces)
+  :group 'engrave-faces
+  :type 'hook)
 
 (defcustom engrave-faces-after-hook nil
   "Hook run after engraving a buffer.
 Unlike `engrave-faces-before-hook', these functions are run in the generated
 buffer.  You may use them to modify the outlook of the final output."
-  :type 'hook
-  :group 'engrave-faces)
+  :group 'engrave-faces
+  :type 'hook)
 
 ;;;###autoload
 (defvar engrave-faces--backends nil)
