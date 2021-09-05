@@ -289,6 +289,14 @@ faces will need to be explicitly styled each time they're used."
               (eq value 'unspecified))
     value))
 
+(defun engrave-faces-preset-style (faces)
+  "Return the preset style for FACES, should it exist.
+Unconditionally returns nil when FACES is default."
+  (pcase faces
+    ('default nil)
+    ((pred symbolp) (assoc faces engrave-faces-preset-styles))
+    ((and (pred listp) (app length 1)) (assoc (car faces) engrave-faces-preset-styles))))
+
 (defun engrave-faces-generate-preset ()
   "Generate `engrave-faces-preset-styles' based on the current theme."
   (mapcar

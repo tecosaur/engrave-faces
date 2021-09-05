@@ -101,7 +101,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
 (defun engrave-faces-html-face-mapper (faces content)
   "Create a HTML representation of CONTENT With FACES applied."
   (let ((protected-content (engrave-faces-html-protect-string content))
-        (style (unless (eq faces 'default) (assoc faces engrave-faces-preset-styles))))
+        (style (engrave-faces-preset-style faces)))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
       (if (and style (eq engrave-faces-html-output-style 'preset))

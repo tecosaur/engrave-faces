@@ -66,7 +66,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
 (defun engrave-faces-latex-face-mapper (faces content)
   "Create a LaTeX representation of CONTENT With FACES applied."
   (let ((protected-content (replace-regexp-in-string "[\\{}$%&_#]" "\\\\\\&" content))
-        (style (unless (eq faces 'default) (assoc faces engrave-faces-preset-styles))))
+        (style (engrave-faces-preset-style faces)))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
       (if (and style (eq engrave-faces-latex-output-style 'preset))
