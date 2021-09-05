@@ -1,6 +1,9 @@
 #+title: Engrave Faces
 #+author: tecosaur
 
+#+html: <a href="http://elpa.gnu.org/packages/engrave-faces.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/engrave-faces.svg"/></a>
+#+html: <a href="http://elpa.gnu.org/devel/engrave-faces.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/engrave-faces.svg"/></a>
+
 There are some great packages for Exporting buffers to particular formats, but
 each one seems to reinvent the core mechanism of processing the font-lock in a
 buffer such that it can be exported to a particular format.
