@@ -61,21 +61,13 @@ Possible values are:
            (append (mapcar (lambda (c) (/ c 257)) (color-values color)) (list background)))))
 
 (defun engrave-faces-ansi-color-dist-squared (reference rgb)
-  "Squared L2 distance between a REFERENCE and RBG values, each a list of 3 values (r g b)."
+  "Squared l2 distance between a REFERENCE and RBG values, each a list of 3 values (r g b)."
   (+ (* (nth 0 reference)
         (nth 0 rgb))
      (* (nth 1 reference)
         (nth 1 rgb))
      (* (nth 2 reference)
         (nth 2 rgb))))
-
-;;;;;; 3-bit / 8-color
-
-(defun engrave-faces-ansi-color-3bit-code (r g b &optional background)
-  "Convert the (R G B) colour code to a correspanding 4bit ansi escape sequence."
-  (format "\uE000[%sm"
-          (% (pcase (nth (engrave-faces-ansi-color-rbg-to-256 r g b)
-                         engrave-faces-ansi-256-to-16-map)) 8)))
 
 ;;;;;; 4-bit / 16-color
 
@@ -104,8 +96,19 @@ Possible values are:
                       engrave-faces-ansi-256-to-16-map)
             ((and (pred (> 8)) n)
              (+ 30 (if background 10 0) n))
-            (n
-             (format "1;%d" (+ 22 (if background 10 0) n))))))
+            (n (+ 82 (if background 10 0) n)))))
+
+;;;;;; 3-bit / 8-color
+
+(defun engrave-faces-ansi-color-3bit-code (r g b &optional background)
+  "Convert the (R G B) colour code to a correspanding 3bit ansi escape sequence.
+Brighter colours are induced via the addition of a bold code."
+  (format "\uE000[%sm"
+          (pcase (nth (engrave-faces-ansi-color-rbg-to-256 r g b)
+                      engrave-faces-ansi-256-to-16-map)
+            ((and (pred (> 8)) n)
+             (+ 30 (if background 10 0) n))
+            (n (format "1;%d" (+ 22 (if background 10 0) n))))))
 
 ;;;;;; 8-bit / 256-color
 
@@ -122,7 +125,7 @@ Possible values are:
   (format (if background "\uE000[48;5;%dm" "\uE000[38;5;%dm")
           (engrave-faces-ansi-color-rbg-to-256 r g b)))
 
-(defun engrave-faces-ansi-color-rbg-to-256 (r g b &optional background)
+(defun engrave-faces-ansi-color-rbg-to-256 (r g b)
   "Convert the (R G B) colour code to the nearest 256-colour."
   (let ((6cube-r (engrave-faces-ansi-color-to-6cube r))
         (6cube-g (engrave-faces-ansi-color-to-6cube g))
