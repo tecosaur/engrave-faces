@@ -169,7 +169,8 @@ are collateral damage from \"[0m\"."
 (declare-function ansi-color-apply-on-region "ansi-color"
                   (begin end &optional preserve-sequences))
 
-;;;###autoload
+;;;###autoload (autoload #'engrave-faces-ansi-buffer "engrave-faces-ansi" nil t)
+;;;###autoload (autoload #'engrave-faces-ansi-file "engrave-faces-ansi" nil t)
 (engrave-faces-define-backend "ansi" ".txt" #'engrave-faces-ansi-face-apply nil
                               (lambda () (ansi-color-apply-on-region (point-min) (point-max) t)))
 (add-hook 'engrave-faces-ansi-after-hook #'engrave-faces-unescape-escape)

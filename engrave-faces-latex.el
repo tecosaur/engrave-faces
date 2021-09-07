@@ -112,7 +112,9 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
   (insert "\\end{Verbatim}
 \\end{document}"))
 
-;;;###autoload
+;;;###autoload (autoload #'engrave-faces-latex-buffer "engrave-faces-latex" nil t)
+;;;###autoload (autoload #'engrave-faces-latex-buffer-standalone "engrave-faces-latex" nil t)
+;;;###autoload (autoload #'engrave-faces-latex-file "engrave-faces-latex" nil t)
 (engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper #'engrave-faces-latex-make-standalone #'latex-mode)
 (add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex-post-processing)
 

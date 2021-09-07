@@ -153,7 +153,9 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
   <body>
 </html>"))
 
-;;;###autoload
+;;;###autoload (autoload #'engrave-faces-html-buffer "engrave-faces-html" nil t)
+;;;###autoload (autoload #'engrave-faces-html-buffer-standalone "engrave-faces-html" nil t)
+;;;###autoload (autoload #'engrave-faces-html-file "engrave-faces-html" nil t)
 (engrave-faces-define-backend "html" ".html" #'engrave-faces-html-face-mapper #'engrave-faces-html-make-standalone #'html-mode)
 
 (provide 'engrave-faces-html)

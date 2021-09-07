@@ -62,7 +62,6 @@ buffer.  You may use them to modify the outlook of the final output."
   :group 'engrave-faces
   :type 'hook)
 
-;;;###autoload
 (defvar engrave-faces--backends nil)
 
 ;;;###autoload
