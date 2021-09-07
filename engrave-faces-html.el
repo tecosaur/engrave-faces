@@ -31,7 +31,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
   (let ((stylesheet
          (mapconcat
           (lambda (face-style)
-            (engrave-faces-html-gen-stylesheet-entry (car face-style) (cdr face-style)))
+            (engrave-faces-html--gen-stylesheet-entry (car face-style) (cdr face-style)))
           engrave-faces-preset-styles
           "\n")))
     (if indent
@@ -41,15 +41,15 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
                    "\n")
       stylesheet)))
 
-(defun engrave-faces-html-gen-stylesheet-entry (face style)
+(defun engrave-faces-html--gen-stylesheet-entry (face style)
   "Generate a HTML preamble line for STYLE representing FACE."
   (concat "." engrave-faces-html-class-prefix (or (plist-get style :slug)
                                                   (symbol-name face))
           " {\n  "
-          (engrave-faces-html-gen-style-css style "\n  ")
+          (engrave-faces-html--gen-style-css style "\n  ")
           " }"))
 
-(defun engrave-faces-html-gen-style-css (attrs seperator)
+(defun engrave-faces-html--gen-style-css (attrs seperator)
   "Compose the relevant CSS styles to apply compatible ATTRS, seperated by SEPERATOR."
   (let ((fg    (plist-get attrs      :foreground))
         (bg    (plist-get attrs      :background))
@@ -67,11 +67,11 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
             (when st "text-decoration: line-through;")
             (when ul "text-decoration: underline;")
             (when it "text-decoration: italic;")
-            (when wt (format "font-weight: %s;" (engrave-faces-html-css-weight wt)))
+            (when wt (format "font-weight: %s;" (engrave-faces-html--css-weight wt)))
             (when (and ht (floatp ht)) (format "font-size: %sem" ht))))
      seperator)))
 
-(defun engrave-faces-html-css-weight (weight)
+(defun engrave-faces-html--css-weight (weight)
   (pcase weight
     ('ultra-light 100) ('extra-light 100)
     ('light 200) ('thin 200)
@@ -84,14 +84,14 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
     ('heavy 900) ('ultra-bold 900)
     ('black 950)))
 
-(defun engrave-faces-html-face-apply (faces content)
+(defun engrave-faces-html--face-apply (faces content)
   (let* ((attrs (engrave-faces-merge-attributes faces))
-         (style (engrave-faces-html-gen-style-css attrs " ")))
+         (style (engrave-faces-html--gen-style-css attrs " ")))
     (if (string= style "")
         content
       (concat "<span style=\"" style "\">" content "</span>"))))
 
-(defun engrave-faces-html-protect-string (str)
+(defun engrave-faces-html--protect-string (str)
   (replace-regexp-in-string
    "<" "&lt;"
    (replace-regexp-in-string
@@ -100,9 +100,9 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
      "&" "&amp;"
      str))))
 
-(defun engrave-faces-html-face-mapper (faces content)
+(defun engrave-faces-html--face-mapper (faces content)
   "Create a HTML representation of CONTENT With FACES applied."
-  (let ((protected-content (engrave-faces-html-protect-string content))
+  (let ((protected-content (engrave-faces-html--protect-string content))
         (style (engrave-faces-preset-style faces)))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
@@ -110,9 +110,9 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
           (concat "<span class=\"" engrave-faces-html-class-prefix
                   (plist-get (cdr style) :slug) "\">"
                   protected-content "</span>")
-        (engrave-faces-html-face-apply faces protected-content)))))
+        (engrave-faces-html--face-apply faces protected-content)))))
 
-(defun engrave-faces-html-make-standalone ()
+(defun engrave-faces-html--make-standalone ()
   "Export current buffer to a standalone HTML buffer."
   (goto-char (point-min))
   (insert "<!DOCTYPE html>
@@ -120,7 +120,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
   <head>
     <meta charset=\"utf-8\">
     <title>"
-          (engrave-faces-html-protect-string (if (buffer-file-name)
+          (engrave-faces-html--protect-string (if (buffer-file-name)
                                                  (file-name-nondirectory (buffer-file-name))
                                                (buffer-name)))
           "</title>
@@ -156,7 +156,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
 ;;;###autoload (autoload #'engrave-faces-html-buffer "engrave-faces-html" nil t)
 ;;;###autoload (autoload #'engrave-faces-html-buffer-standalone "engrave-faces-html" nil t)
 ;;;###autoload (autoload #'engrave-faces-html-file "engrave-faces-html" nil t)
-(engrave-faces-define-backend "html" ".html" #'engrave-faces-html-face-mapper #'engrave-faces-html-make-standalone #'html-mode)
+(engrave-faces-define-backend "html" ".html" #'engrave-faces-html--face-mapper #'engrave-faces-html--make-standalone #'html-mode)
 
 (provide 'engrave-faces-html)
 ;;; engrave-faces-html.el ends here

@@ -147,13 +147,13 @@ If a POSTPROCESSOR function is provided, it is called before saving."
             ;; This loop traverses and reads the source buffer, appending the
             ;; resulting text to the export buffer. This method is fast because:
             ;; 1) it doesn't require examining the text properties char by char
-            ;; (engrave-faces-next-face-change is used to move between runs with
+            ;; (engrave-faces--next-face-change is used to move between runs with
             ;; the same face), and 2) it doesn't require frequent buffer
             ;; switches, which are slow because they rebind all buffer-local
             ;; vars.
             (goto-char (point-min))
             (while (not (eobp))
-              (setq next-change (engrave-faces-next-face-change (point)))
+              (setq next-change (engrave-faces--next-face-change (point)))
               (setq text (buffer-substring-no-properties (point) next-change))
               ;; Don't bother writing anything if there's no text (this
               ;; happens in invisible regions).
@@ -212,7 +212,7 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
                         ((listp face) (plist-get face attribute)))))
                    (delq 'default (if (listp faces) faces (list faces)))))))
 
-(defun engrave-faces-next-face-change (pos &optional limit)
+(defun engrave-faces--next-face-change (pos &optional limit)
   "Find the next face change from POS up to LIMIT.
 
 This function is lifted from htmlize."
@@ -223,11 +223,11 @@ This function is lifted from htmlize."
   (or limit
       (setq limit (point-max)))
   (let ((next-prop (next-single-property-change pos 'face nil limit))
-        (overlay-faces (engrave-faces-overlay-faces-at pos)))
+        (overlay-faces (engrave-faces--overlay-faces-at pos)))
     (while (progn
              (setq pos (next-overlay-change pos))
              (and (< pos next-prop)
-                  (equal overlay-faces (engrave-faces-overlay-faces-at pos)))))
+                  (equal overlay-faces (engrave-faces--overlay-faces-at pos)))))
     (setq pos (min pos next-prop))
     ;; Additionally, we include the entire region that specifies the
     ;; `display' property.
@@ -235,7 +235,7 @@ This function is lifted from htmlize."
       (setq pos (next-single-char-property-change pos 'display nil limit)))
     pos))
 
-(defun engrave-faces-overlay-faces-at (pos)
+(defun engrave-faces--overlay-faces-at (pos)
   (delq nil (mapcar (lambda (o) (overlay-get o 'face)) (overlays-at pos))))
 
 ;;; Style helpers
@@ -282,7 +282,7 @@ faces will need to be explicitly styled each time they're used."
   :type '(repeat (repeat (choice symbol string)))
   :group 'engrave-faces)
 
-(defun engrave-faces-check-nondefault (attr value)
+(defun engrave-faces--check-nondefault (attr value)
   "Return VALUE as long as it is specified, and not the default for ATTR."
   (unless (or (eq value (face-attribute 'default attr nil t))
               (eq value 'unspecified))
@@ -308,7 +308,7 @@ Unconditionally returns nil when FACES is default."
                   (mapcar
                    (lambda (attr)
                      (let ((attr-val (face-attribute (car face-style) attr nil t)))
-                       (when (or (engrave-faces-check-nondefault attr attr-val)
+                       (when (or (engrave-faces--check-nondefault attr attr-val)
                                  (eq (car face-style) 'default))
                          (list attr attr-val))))
                    engrave-faces-attributes-of-interest))))
