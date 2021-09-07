@@ -85,9 +85,11 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
     ('black 950)))
 
 (defun engrave-faces-html-face-apply (faces content)
-  (let ((attrs (engrave-faces-merge-attributes faces)))
-    (concat "<span style=\"" (engrave-faces-html-gen-style-css attrs " ") "\">"
-            content "</span>")))
+  (let* ((attrs (engrave-faces-merge-attributes faces))
+         (style (engrave-faces-html-gen-style-css attrs " ")))
+    (if (string= style "")
+        content
+      (concat "<span style=\"" style "\">" content "</span>"))))
 
 (defun engrave-faces-html-protect-string (str)
   (replace-regexp-in-string
