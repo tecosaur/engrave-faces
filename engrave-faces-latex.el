@@ -102,7 +102,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
 \\usepackage{fvextra}
 \\usepackage[margin=1.5cm]{geometry}
 \\usepackage{sourcecodepro}
-\\pagestype{empty}\n\n"
+\\pagestyle{empty}\n\n"
           (engrave-faces-latex-gen-preamble)
           "
 \\begin{document}
