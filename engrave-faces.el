@@ -37,7 +37,8 @@
 ;;; Code:
 
 (require 'map)
-(require 'subr-x)
+(eval-when-compile
+  (require 'subr-x))
 
 (defgroup engrave-faces nil
   "Export buffers with font-lock information to other formats."
