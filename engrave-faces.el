@@ -308,7 +308,8 @@ Unconditionally returns nil when FACES is default."
             (delq nil
                   (mapcar
                    (lambda (attr)
-                     (let ((attr-val (face-attribute (car face-style) attr nil t)))
+                     (let ((attr-val (when (facep (car face-style))
+                                       (face-attribute (car face-style) attr nil t))))
                        (when (or (engrave-faces--check-nondefault attr attr-val)
                                  (eq (car face-style) 'default))
                          (list attr attr-val))))
