@@ -398,9 +398,9 @@ Unless NOPUT is non-nil, "
 
 (defun engrave-faces-use-theme (&optional theme insert-def)
   "Select a THEME an apply it as the current engraved preset style.
-When INSERT-DEF is non-nil, or the universal argument has been
-provided, an expression adding THEME to `engrave-faces-themes'
-shall be inserted into the current buffer at point."
+When INSERT-DEF is non-nil, or the universal argument has been provided, an
+expression adding THEME to `engrave-faces-themes' shall be inserted into the
+current buffer at point."
   (interactive (list (intern
                       (completing-read
                        "Theme: "
