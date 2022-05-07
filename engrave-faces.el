@@ -63,7 +63,17 @@ buffer.  You may use them to modify the outlook of the final output."
   :group 'engrave-faces
   :type 'hook)
 
+(defcustom engrave-faces-log-preset-missed-faces nil
+  "Whether to log faces not found in `engrave-faces-current-preset-style'."
+  :type 'boolean
+  :group 'engrave-faces)
+
+(defvar engrave-faces-preset-missed-faces nil
+  "Faces not found in `engrave-faces-current-preset-style'.")
+
 (defvar engrave-faces--backends nil)
+
+(define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
 
 ;;;###autoload
 (defmacro engrave-faces-define-backend (backend extension face-transformer &optional standalone-transformer view-setup)
@@ -206,14 +216,6 @@ I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
                        (engrave-faces-explicit-inheritance inherit))))))
          (if (listp faces) faces (list faces)))))
 
-(defvar engrave-faces-preset-missed-faces nil
-  "Faces not found in `engrave-faces-current-preset-style'.")
-
-(defcustom engrave-faces-log-preset-missed-faces nil
-  "Whether to log faces not found in `engrave-faces-current-preset-style'."
-  :type 'boolean
-  :group 'engrave-faces)
-
 (defun engrave-faces-attribute-values (faces attribute)
   "Fetch all specified instances of ATTRIBUTE for FACES, ignoring inheritence.
 To consider inheritence, use `engrave-faces-explicit-inheritance' first."
@@ -317,8 +319,6 @@ cdrs in the form of `engrave-faces-current-preset-style'."
                         :value-type (choice :tag "Value" string symbol)
                         :tag "Face specification"))))
   :group 'engrave-faces)
-
-(define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
 
 (defcustom engrave-faces-current-preset-style
   (alist-get 'default engrave-faces-themes)
