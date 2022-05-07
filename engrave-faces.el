@@ -200,6 +200,14 @@ I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
                        (engrave-faces-explicit-inheritance inherit))))))
          (if (listp faces) faces (list faces)))))
 
+(defvar engrave-faces-preset-missed-faces nil
+  "Faces not found in `engrave-faces-current-preset-style'.")
+
+(defcustom engrave-faces-log-preset-missed-faces nil
+  "Whether to log faces not found in `engrave-faces-current-preset-style'."
+  :type 'boolean
+  :group 'engrave-faces)
+
 (defun engrave-faces-attribute-values (faces attribute)
   "Fetch all specified instances of ATTRIBUTE for FACES, ignoring inheritence.
 To consider inheritence, use `engrave-faces-explicit-inheritance' first."
@@ -209,7 +217,10 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
                      (if-let ((style (cdr (assoc face engrave-faces-preset-styles))))
                          (plist-get style attribute)
                        (cond
-                        ((symbolp face) (face-attribute face attribute nil nil))
+                        ((symbolp face)
+                         (when engrave-faces-log-preset-missed-faces
+                           (push face engrave-faces-preset-missed-faces))
+                         (face-attribute face attribute nil nil))
                         ((listp face) (plist-get face attribute)))))
                    (delq 'default (if (listp faces) faces (list faces)))))))
 
