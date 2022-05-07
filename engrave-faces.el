@@ -378,7 +378,10 @@ Unconditionally returns nil when FACES is default."
 
 (defun engrave-faces-get-theme (theme &optional noput)
   "Obtain the preset style for THEME.
-Unless NOPUT is non-nil, "
+Unless NOPUT is non-nil, the preset will be added to `engrave-faces-themes'.
+The theme t is treated as shorthand for the current theme."
+  (when (eq theme t)
+    (setq theme (car custom-enabled-themes)))
   (if-let ((theme-preset (alist-get theme engrave-faces-themes)))
       (setq engrave-faces-current-preset-style theme-preset)
     (if (or (eq theme (car custom-enabled-themes))
