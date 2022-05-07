@@ -98,28 +98,28 @@ and cause a -standalone version of the buffer transforming function to be create
                     (switch-to-buffer buf)
                     ,(when view-setup `(funcall ,view-setup)))
                   buf)))
-          (defun ,(intern (concat "engrave-faces-" backend "-file")) (file &optional open-result)
+          (defun ,(intern (concat "engrave-faces-" backend "-file")) (file &optional out-file open-result)
             ,(concat "Convert file to " backend " formatting.")
-            (interactive (list buffer-file-name t))
-            (let ((output-file (engrave-faces-file file ,extension ,backend ,standalone-transformer)))
-              (when open-result (find-file output-file))
-              output-file))
+            (interactive (list buffer-file-name nil t))
+            (unless out-file
+              (setq out-file (concat file ,extension)))
+            (engrave-faces-file file out-file ,backend ,standalone-transformer)
+            (when open-result (find-file out-file))
+            out-file)
           (defvar ,(intern (concat "engrave-faces-" backend "-before-hook")) nil)
           (defvar ,(intern (concat "engrave-faces-" backend "-after-hook")) nil)))
 
-(defun engrave-faces-file (file extension backend &optional postprocessor)
-  "Using BACKEND, engrave FILE and save it as FILE.EXTENSION.
+(defun engrave-faces-file (in-file out-file backend &optional postprocessor)
+  "Using BACKEND, engrave IN-FILE and save it as FILE.EXTENSION.
 If a POSTPROCESSOR function is provided, it is called before saving."
-  (let ((output-file (concat file extension)))
-    (with-temp-buffer
-      (insert-file-contents file)
-      (let ((buffer-file-name file))
-        (normal-mode)
-        (with-current-buffer (engrave-faces-buffer backend)
-          (when postprocessor (funcall postprocessor))
-          (write-region (point-min) (point-max) output-file)
-          (kill-buffer))))
-    output-file))
+  (with-temp-buffer
+    (insert-file-contents in-file)
+    (let ((buffer-file-name in-file))
+      (normal-mode)
+      (with-current-buffer (engrave-faces-buffer backend)
+        (when postprocessor (funcall postprocessor))
+        (write-region (point-min) (point-max) out-file)
+        (kill-buffer)))))
 
 (defun engrave-faces-buffer (backend)
   "Export the current buffer with BACKEND and return the created buffer."
