@@ -324,13 +324,28 @@ cdrs in the form of `engrave-faces-current-preset-style'."
   (alist-get 'default engrave-faces-themes)
   "Overriding face values.
 
-By setting :foreground, :background, etc. a certain theme can be set for
-the faces.  The face attributes here will also be used when calculating
-inherited styles.
+This is constructed as an alist of faces, and their face attributes as a plist.
+For example, the \"default\" face coud be specified by:
+
+  (default :foreground \"#000000\" :background \"#FFFFFF\")
+
+By setting :foreground, :background, etc. a certain theme can be
+set for the faces. The face attributes here will also be used
+when calculating inherited styles.
 
 Faces here will represented more compactly when possible, by using the
-:short or :slug parameter to produce a named version styles, wheras other
-faces will need to be explicitly styled each time they're used."
+:short or :slug parameter to produce a named version styles,
+- :short should be a descriptive string comprised of the character class
+  [A-Za-z0-9-_]
+- :slug should be a compact string (i.e. as short as possible), comprised of the
+  character class [A-Za-Z]
+
+For example, for the \"default\" face,
+
+  (default :short \"def\" :slug \"D\"
+           :foreground \"#000000\" :background \"#FFFFFF\")
+
+Other faces will need to be styled explicitly each time they are used."
   :type '(repeat
           (cons (symbol :tag "Face")
                 (plist :key-type (choice
