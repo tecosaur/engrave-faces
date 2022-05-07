@@ -55,11 +55,15 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
     (concat (when fg (format "\\definecolor{EF%s}{HTML}{%s}\n" short (substring fg 1)))
             (when bg (format "\\definecolor{Ef%s}{HTML}{%s}\n" short (substring bg 1)))
             "\\newcommand{\\EF" short "}[1]{"
-            (when bg (concat "\\colorbox{Ef" short "}{\\efstrut{}"))
+            (when (and bg (not (eq face 'default)))
+              (concat "\\colorbox{Ef" short "}{\\efstrut{}"))
             (when fg (concat "\\textcolor{EF" short "}{"))
             (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
             "#1}"
-            (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")
+            (make-string
+             (cl-count-if #'identity
+                          (list (and bg (not (eq face 'default))) fg st bl it))
+             ?})
             " % " (symbol-name face))))
 
 (defun engrave-faces-latex-face-apply (faces content)
