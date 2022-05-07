@@ -394,6 +394,7 @@ The theme t is treated as shorthand for the current theme."
                    (load-theme theme t)
                    (setq spec (engrave-faces-generate-preset))
                    (load-theme old-theme t)
+                   (redraw-display)
                    spec))))
           (unless noput
             (push (cons theme spec) engrave-faces-themes))
