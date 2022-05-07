@@ -27,18 +27,22 @@ When preset, short commands are generated for `engrave-faces-preset-styles'."
   :type 'string
   :group 'engrave-faces)
 
-(defun engrave-faces-latex-gen-preamble ()
+(defun engrave-faces-latex-gen-preamble (&optional theme)
   "Generate a preamble which provides short commands for the preset styles.
 See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
-  (concat
-   (unless (cl-notany (lambda (s) (plist-get (cdr s) :background))
-                      engrave-faces-preset-styles)
-     (format "\\newcommand\\efstrut{%s}\n" engrave-faces-latex-colorbox-strut))
-   (mapconcat
-    (lambda (face-style)
-      (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
-    engrave-faces-preset-styles
-    "\n")))
+  (let ((preset-style
+         (if theme
+             (engrave-faces-get-theme theme)
+           engrave-faces-current-preset-style)))
+    (concat
+     (unless (cl-notany (lambda (s) (plist-get (cdr s) :background))
+                        preset-style)
+       (format "\\newcommand\\efstrut{%s}\n" engrave-faces-latex-colorbox-strut))
+     (mapconcat
+      (lambda (face-style)
+        (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
+      preset-style
+      "\n"))))
 
 (defun engrave-faces-latex-gen-preamble-line (face style)
   "Generate a LaTeX preamble line for STYLE representing FACE."

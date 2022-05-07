@@ -25,14 +25,16 @@ When preset, CSS classes are generated for `engrave-faces-preset-styles'."
   :type 'string
   :group 'engrave-faces)
 
-(defun engrave-faces-html-gen-stylesheet (&optional indent)
+(defun engrave-faces-html-gen-stylesheet (&optional theme indent)
   "Generate a preamble which provides short commands for the preset styles.
 See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
   (let ((stylesheet
          (mapconcat
           (lambda (face-style)
             (engrave-faces-html--gen-stylesheet-entry (car face-style) (cdr face-style)))
-          engrave-faces-preset-styles
+          (if theme
+              (engrave-faces-get-theme theme)
+            engrave-faces-current-preset-style)
           "\n")))
     (if indent
         (mapconcat (lambda (line)
@@ -125,7 +127,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
                                                (buffer-name)))
           "</title>
     <style>"
-          (let* ((default-sty (cdr (assoc 'default engrave-faces-preset-styles)))
+          (let* ((default-sty (cdr (assoc 'default engrave-faces-current-preset-style)))
                  (default-bg (plist-get default-sty :background))
                  (default-fg (plist-get default-sty :foreground)))
             (if (or default-bg default-fg)
