@@ -91,7 +91,7 @@ and cause a -standalone version of the buffer transforming function to be create
                        (list ,backend :face-transformer ,face-transformer :extension ,extension))
           (defun ,(intern (concat "engrave-faces-" backend "-buffer")) (&optional theme switch-to-result)
             ,(concat "Convert buffer to " backend " formatting.")
-            (interactive '(t))
+            (interactive '(nil t))
             (let ((buf (engrave-faces-buffer ,backend theme)))
               (when switch-to-result
                 (switch-to-buffer buf)
@@ -99,7 +99,7 @@ and cause a -standalone version of the buffer transforming function to be create
               buf))
           ,(when standalone-transformer
              `(defun ,(intern (concat "engrave-faces-" backend "-buffer-standalone")) (&optional theme switch-to-result)
-                (interactive '(t))
+                (interactive '(nil t))
                 ,(concat "Export the current buffer to a standalone " backend " buffer.")
                 (let ((buf (engrave-faces-buffer ,backend theme)))
                   (with-current-buffer buf
@@ -110,7 +110,7 @@ and cause a -standalone version of the buffer transforming function to be create
                   buf)))
           (defun ,(intern (concat "engrave-faces-" backend "-file")) (file &optional out-file theme open-result)
             ,(concat "Convert file to " backend " formatting.")
-            (interactive (list buffer-file-name nil t))
+            (interactive (list buffer-file-name nil nil t))
             (unless out-file
               (setq out-file (concat file ,extension)))
             (engrave-faces-file file out-file ,backend theme ,standalone-transformer)
