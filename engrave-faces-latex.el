@@ -27,44 +27,69 @@ When preset, short commands are generated for `engrave-faces-preset-styles'."
   :type 'string
   :group 'engrave-faces)
 
-(defun engrave-faces-latex-gen-preamble (&optional theme)
+(defun engrave-faces-latex-gen-preamble (&optional theme type)
   "Generate a preamble which provides short commands for the preset styles.
-See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
-  (let ((preset-style
+See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'.
+TYPE is passed to `engrave-faces-latex-gen-preamble-line', and when TYPE
+is set to colors, the strut definition is also ommited."
+  (let ((engrave-faces-current-preset-style
          (if theme
              (engrave-faces-get-theme theme)
            engrave-faces-current-preset-style)))
     (concat
-     (unless (cl-notany (lambda (s) (plist-get (cdr s) :background))
-                        preset-style)
+     (unless (eq type 'colors)
        (format "\\newcommand\\efstrut{%s}\n" engrave-faces-latex-colorbox-strut))
      (mapconcat
       (lambda (face-style)
-        (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
-      preset-style
+        (engrave-faces-latex-gen-preamble-line
+         (car face-style) (cdr face-style) type))
+      engrave-faces-current-preset-style
       "\n"))))
 
-(defun engrave-faces-latex-gen-preamble-line (face style)
-  "Generate a LaTeX preamble line for STYLE representing FACE."
-  (let ((short (plist-get style         :slug))
-        (fg    (plist-get style         :foreground))
-        (bg    (plist-get style         :background))
-        (st    (plist-get style         :strike-through))
-        (it    (eql (plist-get style    :slant) 'italic))
-        (bl    (member (plist-get style :weight) '(bold extra-bold))))
-    (concat (when fg (format "\\definecolor{EF%s}{HTML}{%s}\n" short (substring fg 1)))
-            (when bg (format "\\definecolor{Ef%s}{HTML}{%s}\n" short (substring bg 1)))
-            "\\newcommand{\\EF" short "}[1]{"
-            (when (and bg (not (eq face 'default)))
-              (concat "\\colorbox{Ef" short "}{\\efstrut{}"))
-            (when fg (concat "\\textcolor{EF" short "}{"))
-            (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
-            "#1}"
-            (make-string
-             (cl-count-if #'identity
-                          (list (and bg (not (eq face 'default))) fg st bl it))
-             ?})
-            " % " (symbol-name face))))
+(defun engrave-faces-latex-gen-preamble-line (face style &optional type)
+  "Generate a LaTeX preamble line for STYLE representing FACE.
+type can be set to either the symbol colors or definitions, in which case
+it limits the generate lines to only colors or definitions."
+  (let ((slug (plist-get style         :slug))
+        (fg   (plist-get style         :foreground))
+        (bg   (plist-get style         :background))
+        (st   (plist-get style         :strike-through))
+        (it   (eql (plist-get style    :slant) 'italic))
+        (bl   (member (plist-get style :weight) '(bold extra-bold)))
+        (defaultslug
+          (plist-get (alist-get 'default
+                                engrave-faces-current-preset-style)
+                     :slug)))
+    (let ((colors
+           (concat
+            (if fg
+                (format "\\definecolor{EF%s}{HTML}{%s}" slug (substring fg 1))
+              (when (eq type 'colors)
+                (format "\\colorlet{EF%s}{EF%s}" slug defaultslug)))
+            (when (or (and fg bg) (eq type 'colors))
+              "\n")
+            (if bg
+                (format "\\definecolor{Ef%s}{HTML}{%s}" slug (substring bg 1))
+              (when (eq type 'colors)
+                (format "\\colorlet{Ef%s}{Ef%s}" slug defaultslug)))))
+          (definitions
+            (concat
+             "\\newcommand{\\EF" slug "}[1]{"
+             (when (and bg (not (eq face 'default)))
+               (concat "\\colorbox{Ef" slug "}{\\efstrut{}"))
+             (when fg (concat "\\textcolor{EF" slug "}{"))
+             (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
+             "#1}"
+             (make-string
+              (cl-count-if #'identity
+                           (list (and bg (not (eq face 'default))) fg st bl it))
+              ?})
+             " % " (symbol-name face))))
+      (pcase type
+        ('colors colors)
+        ('definitions definitions)
+        ('nil (concat colors "\n" definitions))
+        (invalid (user-error "Invalid preamble line type `%s'." invalid))))))
 
 (defun engrave-faces-latex-face-apply (faces content)
   "Convert each (compatable) parameter of FACES to a LaTeX command apllied to CONTENT."
@@ -101,7 +126,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
   (insert
    (let ((style (cdr (assoc 'default engrave-faces-preset-styles))))
      (if (eq engrave-faces-latex-output-style 'preset)
-       (format "\\color{EF%s}" (plist-get style :slug))
+         (format "\\color{EF%s}" (plist-get style :slug))
        (concat "\\color[HTML]{" (substring (plist-get style :foreground) 1) "}"))))
   (dolist (find-sub engrave-faces-latex-char-replacements)
     (goto-char (point-min))
