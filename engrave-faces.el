@@ -398,7 +398,7 @@ The theme t is treated as shorthand for the current theme."
   (when (eq theme t)
     (setq theme (car custom-enabled-themes)))
   (if-let ((theme-preset (alist-get theme engrave-faces-themes)))
-      (setq engrave-faces-current-preset-style theme-preset)
+      theme-preset
     (if (or (eq theme (car custom-enabled-themes))
             (memq theme (custom-available-themes)))
         (let ((spec
