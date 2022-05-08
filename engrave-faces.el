@@ -263,7 +263,7 @@ This function is lifted from htmlize."
 (defcustom engrave-faces-themes
   '((default .
       (;; faces.el --- excluding: bold, italic, bold-italic, underline, and some others
-       (default                             :short "default"             :slug "D"   :foreground "#000000")
+       (default                             :short "default"             :slug "D"   :foreground "#000000" :background "#ffffff")
        (shadow                              :short "shadow"              :slug "h"   :foreground "#7f7f7f")
        (success                             :short "success"             :slug "sc"  :foreground "#228b22" :weight bold)
        (warning                             :short "warning"             :slug "w"   :foreground "#ff8e00" :weight bold)
