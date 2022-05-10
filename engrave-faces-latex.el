@@ -130,11 +130,14 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
           (concat "\\EF" (plist-get (cdr style) :slug) "{" protected-content "}")
         (engrave-faces-latex-face-apply faces protected-content)))))
 
+(defun engrave-faces-latex--post-processing ()
+  " Set the initial text color and curly paren positioning.
+Trailing curly parens are sometimes put on the next line, and need to be moved back."
   (goto-char (point-min))
   (insert
    (let ((style (cdr (assoc 'default engrave-faces-preset-styles))))
      (if (eq engrave-faces-latex-output-style 'preset)
-       (format "\\color{EF%s}" (plist-get style :slug))
+         (format "\\color{EF%s}" (plist-get style :slug))
        (concat "\\color[HTML]{" (substring (plist-get style :foreground) 1) "}"))))
   (goto-char (point-min))
   (while (re-search-forward "\n\\([[:space:]]*\\)\\(}+\\)" nil t)
@@ -167,7 +170,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
 ;;;###autoload (autoload #'engrave-faces-latex-buffer-standalone "engrave-faces-latex" nil t)
 ;;;###autoload (autoload #'engrave-faces-latex-file "engrave-faces-latex" nil t)
 (engrave-faces-define-backend "latex" ".tex" #'engrave-faces-latex-face-mapper #'engrave-faces-latex-make-standalone #'latex-mode)
-(add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex-post-processing)
+(add-hook 'engrave-faces-latex-after-hook #'engrave-faces-latex--post-processing)
 
 (provide 'engrave-faces-latex)
 ;;; engrave-faces-latex.el ends here
