@@ -21,6 +21,14 @@ When preset, short commands are generated for `engrave-faces-preset-styles'."
   :type '(choice nil preset)
   :group 'engrave-faces)
 
+(defcustom engrave-faces-latex-mathescape nil
+  "Whether $ characters in comments should be allowed.
+This is intended to be used with fvextra's mathescape option, and
+only applies to text set with `font-lock-comment-face' including
+at least two $s."
+  :type 'boolean
+  :group 'engrave-faces)
+
 (defcustom engrave-faces-latex-colorbox-strut
   "\\vrule height 2.1ex depth 0.8ex width 0pt"
   "LaTeX code which sets the height and depth for any colorboxes."
@@ -81,32 +89,53 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
        content
        (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")))))
 
+(defconst engrave-faces-latex--char-replacements
+  '(("\\" . "\\char92{}")
+    ("^" . "\\char94{}")
+    ("~" . "\\char126{}")))
+
+(defun engrave-faces-latex--protect-content (content)
+  (replace-regexp-in-string
+   "[\\{}$%&_#]" "\\\\\\&"
+   (replace-regexp-in-string
+    (regexp-opt (mapcar #'car engrave-faces-latex--char-replacements))
+    (lambda (char)
+      (cdr (assoc char engrave-faces-latex--char-replacements)))
+    content
+    nil t)))
+
+(defun engrave-faces-latex--protect-content-mathescape (content)
+  (replace-regexp-in-string
+   "\\`\\([^$]*\\)\\(\\$.+\\$\\)\\([^$]*\\)\\'"
+   (lambda (full-match)
+     (concat (engrave-faces-latex--protect-content (match-string 1 full-match))
+             (match-string 2 full-match)
+             (engrave-faces-latex--protect-content (match-string 3 full-match))))
+   content
+   nil t))
+
 (defun engrave-faces-latex-face-mapper (faces content)
   "Create a LaTeX representation of CONTENT With FACES applied."
-  (let ((protected-content (replace-regexp-in-string "[\\{}$%&_#]" "\\\\\\&" content))
-        (style (engrave-faces-preset-style faces)))
+  (let* ((style (engrave-faces-preset-style faces))
+         (protected-content
+          (funcall
+           (if (and engrave-faces-latex-mathescape
+                    (eq 'font-lock-comment-face (car style)))
+               #'engrave-faces-latex--protect-content-mathescape
+             #'engrave-faces-latex--protect-content)
+           content)))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
       (if (and style (eq engrave-faces-latex-output-style 'preset))
           (concat "\\EF" (plist-get (cdr style) :slug) "{" protected-content "}")
         (engrave-faces-latex-face-apply faces protected-content)))))
 
-(defvar engrave-faces-latex-char-replacements
-  '(("\\\\" . "\\\\char92{}")
-    ("^" . "\\\\char94{}")
-    ("~" . "\\\\char126{}")))
-
-(defun engrave-faces-latex-post-processing ()
   (goto-char (point-min))
   (insert
    (let ((style (cdr (assoc 'default engrave-faces-preset-styles))))
      (if (eq engrave-faces-latex-output-style 'preset)
        (format "\\color{EF%s}" (plist-get style :slug))
        (concat "\\color[HTML]{" (substring (plist-get style :foreground) 1) "}"))))
-  (dolist (find-sub engrave-faces-latex-char-replacements)
-    (goto-char (point-min))
-    (while (search-forward (car find-sub) nil t)
-      (replace-match (cdr find-sub))))
   (goto-char (point-min))
   (while (re-search-forward "\n\\([[:space:]]*\\)\\(}+\\)" nil t)
     (replace-match "\\2\n\\1")))
@@ -126,7 +155,10 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
           "
 \\begin{document}
 \\setlength{\\fboxsep}{0pt}
-\\begin{Verbatim}[breaklines=true, commandchars=\\\\\\{\\}]\n")
+\\begin{Verbatim}[breaklines=true, commandchars=\\\\\\{\\}"
+          (when engrave-faces-latex-mathescape
+            ", mathescape")
+          "]\n")
   (goto-char (point-max))
   (insert "\\end{Verbatim}
 \\end{document}"))
