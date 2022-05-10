@@ -161,11 +161,18 @@ Trailing curly parens are sometimes put on the next line, and need to be moved b
 \\pagestyle{empty}\n\n"
           (engrave-faces-latex-gen-preamble)
           "
-\\begin{document}
-\\setlength{\\fboxsep}{0pt}
+\\begin{document}\n"
+          (let ((default-face
+                  (alist-get 'default engrave-faces-current-preset-style)))
+            (concat
+             (when (plist-get default-face :background)
+               (format "\\pagecolor{Ef%s}\n" (plist-get default-face :slug)))
+             (when (plist-get default-face :foreground)
+               (format "\\color{EF%s}\n" (plist-get default-face :slug)))))
+          "\\setlength{\\fboxsep}{0pt}
 \\begin{Verbatim}[breaklines=true, commandchars=\\\\\\{\\}"
           (if engrave-faces-latex-mathescape
-            ", mathescape" "")
+              ", mathescape" "")
           "]\n")
   (goto-char (point-max))
   (insert "\\end{Verbatim}
