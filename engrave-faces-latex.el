@@ -90,29 +90,34 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
        (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")))))
 
 (defconst engrave-faces-latex--char-replacements
-  '(("\\" . "\\char92{}")
+  '(("\\\\" . "\\char92{}")
     ("^" . "\\char94{}")
     ("~" . "\\char126{}")))
 
 (defun engrave-faces-latex--protect-content (content)
   (replace-regexp-in-string
-   "[\\{}$%&_#]" "\\\\\\&"
+   (regexp-opt (mapcar #'car engrave-faces-latex--char-replacements))
+   (lambda (char)
+     (cdr (assoc char engrave-faces-latex--char-replacements)))
    (replace-regexp-in-string
-    (regexp-opt (mapcar #'car engrave-faces-latex--char-replacements))
-    (lambda (char)
-      (cdr (assoc char engrave-faces-latex--char-replacements)))
-    content
-    nil t)))
+    "[\\{}$%&_#]" "\\\\\\&"
+    content)
+   nil t))
 
 (defun engrave-faces-latex--protect-content-mathescape (content)
-  (replace-regexp-in-string
-   "\\`\\([^$]*\\)\\(\\$.+\\$\\)\\([^$]*\\)\\'"
-   (lambda (full-match)
-     (concat (engrave-faces-latex--protect-content (match-string 1 full-match))
-             (match-string 2 full-match)
-             (engrave-faces-latex--protect-content (match-string 3 full-match))))
-   content
-   nil t))
+  (let ((dollar-maths (string-match-p "\\$.+\\$" content))
+        (paren-maths (string-match-p "\\\\(.+\\\\)" content)))
+    (replace-regexp-in-string
+     (cond
+      (dollar-maths "^\\([^$]*\\)\\(\\$.+\\$\\)\\([^$]*\\)$")
+      (paren-maths "^\\(.*?\\)\\(\\\\(.+\\\\)\\)\\(.*?\\)$")
+      (t "^\\(.*\\)\\(\\)\\(\\)$"))
+     (lambda (full-match)
+       (concat (engrave-faces-latex--protect-content (match-string 1 full-match))
+               (match-string 2 full-match)
+               (engrave-faces-latex--protect-content (match-string 3 full-match))))
+     content
+     nil t)))
 
 (defun engrave-faces-latex-face-mapper (faces content)
   "Create a LaTeX representation of CONTENT With FACES applied."
@@ -159,8 +164,8 @@ Trailing curly parens are sometimes put on the next line, and need to be moved b
 \\begin{document}
 \\setlength{\\fboxsep}{0pt}
 \\begin{Verbatim}[breaklines=true, commandchars=\\\\\\{\\}"
-          (when engrave-faces-latex-mathescape
-            ", mathescape")
+          (if engrave-faces-latex-mathescape
+            ", mathescape" "")
           "]\n")
   (goto-char (point-max))
   (insert "\\end{Verbatim}
