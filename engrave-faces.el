@@ -387,7 +387,13 @@ Unconditionally returns nil when FACES is default."
                        (when (or (engrave-faces--check-nondefault attr attr-val)
                                  (and (eq (car face-style) 'default)
                                       (not (memq attr '(:height :strike-through)))))
-                         (list attr attr-val))))
+                         (list attr
+                               (if (and (memq attr '(:foreground :background))
+                                        (not (string-prefix-p "#" attr-val)))
+                                   (apply 'format "#%02x%02x%02x"
+                                          (mapcar (lambda (c) (ash c -8))
+                                                  (color-values attr-val)))
+                                 attr-val)))))
                    engrave-faces-attributes-of-interest))))
    engrave-faces-preset-styles))
 
