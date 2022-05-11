@@ -22,10 +22,22 @@ When preset, short commands are generated for `engrave-faces-preset-styles'."
   :group 'engrave-faces)
 
 (defcustom engrave-faces-latex-mathescape nil
-  "Whether $ characters in comments should be allowed.
-This is intended to be used with fvextra's mathescape option, and
-only applies to text set with `font-lock-comment-face' including
-at least two $s."
+  "Whether maths characters in comments should be allowed.
+
+When nil, all potential maths (both \"$tex$\" and
+\"\\(latex\\)\") is protected by
+`engrave-faces-latex--protect-content'. Three non-nil symbols are
+supported:
+- latex, in which case the content of LaTeX maths is left unprotected
+- tex, in which case the content of TeX dollar-delimited maths is left
+  unprotected
+- t, in which case LaTeX and TeX maths are supported
+
+This only affects text set with `font-lock-comment-face'.
+
+For TeX maths to be supported, fvextra's mathescape option must
+also be applied. This is done automatically when generating a
+standalone document."
   :type 'boolean
   :group 'engrave-faces)
 
@@ -105,8 +117,12 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
    nil t))
 
 (defun engrave-faces-latex--protect-content-mathescape (content)
-  (let ((dollar-maths (string-match-p "\\$.+\\$" content))
-        (paren-maths (string-match-p "\\\\(.+\\\\)" content)))
+  (let ((dollar-maths
+         (and (memq engrave-faces-latex-mathescape '(t tex TeX))
+              (string-match-p "\\$.+\\$" content)))
+        (paren-maths
+         (and (memq engrave-faces-latex-mathescape '(t latex LaTeX))
+              (string-match-p "\\\\(.+\\\\)" content))))
     (replace-regexp-in-string
      (cond
       (dollar-maths "^\\([^$]*\\)\\(\\$.+\\$\\)\\([^$]*\\)$")
