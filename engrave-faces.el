@@ -6,7 +6,7 @@
 ;; Maintainer: TEC <tec@tecosaur.com>
 ;; Created: January 18, 2021
 ;; Modified: July 10, 2021
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Keywords: faces
 ;; Homepage: https://github.com/tecosaur/engrave-faces
 ;; Package-Requires: ((emacs "27.1"))
