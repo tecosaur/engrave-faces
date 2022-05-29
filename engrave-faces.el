@@ -382,10 +382,13 @@ Unconditionally returns nil when FACES is default."
             (delq nil
                   (mapcar
                    (lambda (attr)
-                     (let ((attr-val (when (facep (car face-style))
-                                       (face-attribute (car face-style) attr nil t))))
+                     (when-let ((attr-val (when (facep (car face-style))
+                                            (or (face-attribute (car face-style) attr nil t)
+                                                (engrave-faces--get-fallback-face-attribute (car face-style) attr t)))))
                        (when (or (engrave-faces--check-nondefault attr attr-val)
                                  (and (eq (car face-style) 'default)
+                                      (when (stringp attr-val)
+                                        (not (string-prefix-p "unspecified" attr-val)))
                                       (not (memq attr '(:height :strike-through)))))
                          (list attr
                                (if (and (memq attr '(:foreground :background))
@@ -454,6 +457,37 @@ current buffer at point."
              'engrave-faces-themes
              ',(cons name (or spec
                               (engrave-faces-get-theme name)))))))
+
+(defun engrave-faces--get-fallback-face-attribute (face attribute &optional inherit theme-settings)
+  (unless theme-settings
+    (require (intern (format "%s-theme" (car custom-enabled-themes))))
+    (setq theme-settings (get (car custom-enabled-themes) 'theme-settings)))
+  (let* ((spec
+          (cl-loop for (type f _ spec) in theme-settings
+                   if (and (eq type 'theme-face) (eq face f))
+                   return spec))
+         (spec
+          (cl-labels
+              ((window-system (_frame) 'x)
+               (display-color-cells (_frame) 257)
+               (frame-parameter (_frame parameter)
+                                (pcase parameter
+                                  (`display-type 'color)
+                                  (`background-mode 'dark)))
+               (display-supports-face-attributes-p (&rest _) t))
+            (face-spec-choose spec)))
+         (inh (if inherit (plist-get spec :inherit)))
+         (value (if (plist-member spec attribute)
+                    (plist-get spec attribute)
+                  'unspecified)))
+    (unless (or (null inh) (eq inh 'unspecified))
+      (cl-labels ((face-attribute
+                   (face attribute &optional _frame inherit)
+                   (engrave-faces--get-fallback-face-attribute face attribute inherit theme-settings)))
+        (setq value (face-attribute-merged-with attribute value (if (facep inherit)
+                                                                    inherit
+                                                                  face)))))
+    value))
 
 (provide 'engrave-faces)
 ;;; engrave-faces.el ends here
