@@ -45,7 +45,7 @@
   :group 'hypermedia)
 
 (defcustom engrave-faces-attributes-of-interest
-  '(:foreground :background :slant :weight :height :strike-through)
+  '(:family :foreground :background :slant :weight :height :strike-through)
   "Attributes which sould be paid attention to."
   :group 'engrave-faces
   :type '(repeat symbol))
@@ -263,11 +263,15 @@ This function is lifted from htmlize."
 (defcustom engrave-faces-themes
   '((default .
       (;; faces.el --- excluding: bold, italic, bold-italic, underline, and some others
-       (default                             :short "default"             :slug "D"   :foreground "#000000" :background "#ffffff")
+       (default                             :short "default"             :slug "D"   :foreground "#000000" :background "#ffffff" :family "Monospace")
+       (variable-pitch                      :short "var-pitch"           :slug "vp"  :foreground "#000000"                       :family "Sans Serif")
        (shadow                              :short "shadow"              :slug "h"   :foreground "#7f7f7f")
        (success                             :short "success"             :slug "sc"  :foreground "#228b22" :weight bold)
        (warning                             :short "warning"             :slug "w"   :foreground "#ff8e00" :weight bold)
        (error                               :short "error"               :slug "e"   :foreground "#ff0000" :weight bold)
+       (link                                :short "link"                :slug "l"   :foreground "#ff0000")
+       (link-visited                        :short "link"                :slug "lv"  :foreground "#ff0000")
+       (highlight                           :short "link"                :slug "hi"  :foreground "#ff0000")
        ;; font-lock.el
        (font-lock-comment-face              :short "fl-comment"          :slug "c"   :foreground "#b22222")
        (font-lock-comment-delimiter-face    :short "fl-comment-delim"    :slug "cd"  :foreground "#b22222")
@@ -287,6 +291,17 @@ This function is lifted from htmlize."
        (font-lock-regexp-grouping-backslash :short "fl-regexp-backslash" :slug "rb"                        :weight bold)
        ;; org-faces.el
        (org-block                           :short "org-block"           :slug "ob") ; forcing no background is preferable
+       (org-block-begin-line                :short "org-block-begin"     :slug "obb") ; forcing no background is preferable
+       (org-block-end-line                  :short "org-block-end"       :slug "obe") ; forcing no background is preferable
+       ;; outlines
+       (outline-1                           :short "outline-1"           :slug "Oa"  :foreground "#0000ff")
+       (outline-2                           :short "outline-2"           :slug "Ob"  :foreground "#a0522d")
+       (outline-3                           :short "outline-3"           :slug "Oc"  :foreground "#a020f0")
+       (outline-4                           :short "outline-4"           :slug "Od"  :foreground "#b22222")
+       (outline-5                           :short "outline-5"           :slug "Oe"  :foreground "#228b22")
+       (outline-6                           :short "outline-6"           :slug "Of"  :foreground "#008b8b")
+       (outline-7                           :short "outline-7"           :slug "Og"  :foreground "#483d8b")
+       (outline-8                           :short "outline-8"           :slug "Oh"  :foreground "#8b2252")
        ;; highlight-numbers.el
        (highlight-numbers-number            :short "hl-number"           :slug "hn"  :foreground "#008b8b")
        ;; highlight-quoted.el
@@ -382,8 +397,8 @@ Unconditionally returns nil when FACES is default."
             (delq nil
                   (mapcar
                    (lambda (attr)
-                     (let ((attr-val (when (facep (car face-style))
-                                       (face-attribute (car face-style) attr nil t))))
+                     (when-let ((attr-val (when (facep (car face-style))
+                                            (face-attribute (car face-style) attr nil t))))
                        (when (or (engrave-faces--check-nondefault attr attr-val)
                                  (and (eq (car face-style) 'default)
                                       (not (memq attr '(:height :strike-through)))))
