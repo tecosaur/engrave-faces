@@ -99,8 +99,8 @@ and cause a -standalone version of the buffer transforming function to be create
               buf))
           ,(when standalone-transformer
              `(defun ,(intern (concat "engrave-faces-" backend "-buffer-standalone")) (&optional theme switch-to-result)
-                (interactive '(nil t))
                 ,(concat "Export the current buffer to a standalone " backend " buffer.")
+                (interactive '(nil t))
                 (let ((buf (engrave-faces-buffer ,backend theme)))
                   (with-current-buffer buf
                     (funcall ,standalone-transformer))
