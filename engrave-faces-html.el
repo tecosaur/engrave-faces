@@ -74,17 +74,21 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
      seperator)))
 
 (defun engrave-faces-html--css-weight (weight)
+  "Give the numerical CSS font WEIGHT.
+Values are taken from https://docs.microsoft.com/en-us/typography/opentype/spec/os2#usweightclass."
   (pcase weight
-    ('ultra-light 100) ('extra-light 100)
-    ('light 200) ('thin 200)
-    ('semi-light 300)
-    ('book 400) ('normal 400) ('regular 400)
+    ('thin 100)
+    ('extra-light 200) ('ultra-light 200)
+    ('light 300)
+    ('semi-light 350)
+    ('normal 400)
+    ('regular 400)
+    ('book 450)
     ('medium 500)
     ('semi-bold 600) ('demi-bold 600)
     ('bold 700)
-    ('extra-bold 800)
-    ('heavy 900) ('ultra-bold 900)
-    ('black 950)))
+    ('exra-bold 800) ('ultra-bold 800)
+    ('black 900) ('heavy 900)))
 
 (defun engrave-faces-html--face-apply (faces content)
   (let* ((attrs (engrave-faces-merge-attributes faces))
