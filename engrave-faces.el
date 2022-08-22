@@ -68,25 +68,142 @@ buffer.  You may use them to modify the outlook of the final output."
   :type 'boolean
   :group 'engrave-faces)
 
+(define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
+
+(defcustom engrave-faces-current-preset-style
+  (alist-get 'default engrave-faces-themes)
+  "Overriding face values.
+
+This is constructed as an alist of faces, and their face attributes as a plist.
+For example, the \"default\" face could be specified by:
+
+  (default :foreground \"#000000\" :background \"#FFFFFF\")
+
+By setting :foreground, :background, etc. a certain theme can be
+set for the faces. The face attributes here will also be used
+when calculating inherited styles. Note that colours must be
+given in hexadecimal form.
+
+Faces here will represented more compactly when possible, by using the
+:short or :slug parameter to produce a named version styles,
+- :short should be a descriptive string comprised of the character class
+  [A-Za-z0-9-_]
+- :slug should be a compact string (i.e. as short as possible), comprised of the
+  character class [A-Za-Z]
+
+For example, for the \"default\" face,
+
+  (default :short \"def\" :slug \"D\"
+           :foreground \"#000000\" :background \"#FFFFFF\")
+
+Other faces will need to be styled explicitly each time they are used."
+  :type '(repeat
+          (cons (symbol :tag "Face")
+                (plist :key-type (choice
+                                  (const :tag "Short identifier" :short)
+                                  (const :tag "Very short identifier" :slug)
+                                  (symbol :tag "Face attribute")
+                                  :tag "Property")
+                       :value-type (choice :tag "Value" string symbol)
+                       :tag "Face specification")))
+  :group 'engrave-faces)
+
+(defcustom engrave-faces-themes
+  '((default .
+      (;; faces.el --- excluding: bold, italic, bold-italic, underline, and some others
+       (default                             :short "default"             :slug "D"   :foreground "#000000" :background "#ffffff" :family "Monospace")
+       (variable-pitch                      :short "var-pitch"           :slug "vp"  :foreground "#000000"                       :family "Sans Serif")
+       (shadow                              :short "shadow"              :slug "h"   :foreground "#7f7f7f")
+       (success                             :short "success"             :slug "sc"  :foreground "#228b22" :weight bold)
+       (warning                             :short "warning"             :slug "w"   :foreground "#ff8e00" :weight bold)
+       (error                               :short "error"               :slug "e"   :foreground "#ff0000" :weight bold)
+       (link                                :short "link"                :slug "l"   :foreground "#ff0000")
+       (link-visited                        :short "link"                :slug "lv"  :foreground "#ff0000")
+       (highlight                           :short "link"                :slug "hi"  :foreground "#ff0000")
+       ;; font-lock.el
+       (font-lock-comment-face              :short "fl-comment"          :slug "c"   :foreground "#b22222")
+       (font-lock-comment-delimiter-face    :short "fl-comment-delim"    :slug "cd"  :foreground "#b22222")
+       (font-lock-string-face               :short "fl-string"           :slug "s"   :foreground "#8b2252")
+       (font-lock-doc-face                  :short "fl-doc"              :slug "d"   :foreground "#8b2252")
+       (font-lock-doc-markup-face           :short "fl-doc-markup"       :slug "m"   :foreground "#008b8b")
+       (font-lock-keyword-face              :short "fl-keyword"          :slug "k"   :foreground "#9370db")
+       (font-lock-builtin-face              :short "fl-builtin"          :slug "b"   :foreground "#483d8b")
+       (font-lock-function-name-face        :short "fl-function"         :slug "f"   :foreground "#0000ff")
+       (font-lock-variable-name-face        :short "fl-variable"         :slug "v"   :foreground "#a0522d")
+       (font-lock-type-face                 :short "fl-type"             :slug "t"   :foreground "#228b22")
+       (font-lock-constant-face             :short "fl-constant"         :slug "o"   :foreground "#008b8b")
+       (font-lock-warning-face              :short "fl-warning"          :slug "wr"  :foreground "#ff0000" :weight bold)
+       (font-lock-negation-char-face        :short "fl-neg-char"         :slug "nc")
+       (font-lock-preprocessor-face         :short "fl-preprocessor"     :slug "pp"  :foreground "#483d8b")
+       (font-lock-regexp-grouping-construct :short "fl-regexp"           :slug "rc"                        :weight bold)
+       (font-lock-regexp-grouping-backslash :short "fl-regexp-backslash" :slug "rb"                        :weight bold)
+       ;; org-faces.el
+       (org-block                           :short "org-block"           :slug "ob") ; forcing no background is preferable
+       (org-block-begin-line                :short "org-block-begin"     :slug "obb") ; forcing no background is preferable
+       (org-block-end-line                  :short "org-block-end"       :slug "obe") ; forcing no background is preferable
+       ;; outlines
+       (outline-1                           :short "outline-1"           :slug "Oa"  :foreground "#0000ff")
+       (outline-2                           :short "outline-2"           :slug "Ob"  :foreground "#a0522d")
+       (outline-3                           :short "outline-3"           :slug "Oc"  :foreground "#a020f0")
+       (outline-4                           :short "outline-4"           :slug "Od"  :foreground "#b22222")
+       (outline-5                           :short "outline-5"           :slug "Oe"  :foreground "#228b22")
+       (outline-6                           :short "outline-6"           :slug "Of"  :foreground "#008b8b")
+       (outline-7                           :short "outline-7"           :slug "Og"  :foreground "#483d8b")
+       (outline-8                           :short "outline-8"           :slug "Oh"  :foreground "#8b2252")
+       ;; highlight-numbers.el
+       (highlight-numbers-number            :short "hl-number"           :slug "hn"  :foreground "#008b8b")
+       ;; highlight-quoted.el
+       (highlight-quoted-quote              :short "hl-qquote"           :slug "hq"  :foreground "#9370db")
+       (highlight-quoted-symbol             :short "hl-qsymbol"          :slug "hs"  :foreground "#008b8b")
+       ;; rainbow-delimiters.el
+       (rainbow-delimiters-depth-1-face     :short "rd-1"                :slug "rda" :foreground "#707183")
+       (rainbow-delimiters-depth-2-face     :short "rd-2"                :slug "rdb" :foreground "#7388d6")
+       (rainbow-delimiters-depth-3-face     :short "rd-3"                :slug "rdc" :foreground "#909183")
+       (rainbow-delimiters-depth-4-face     :short "rd-4"                :slug "rdd" :foreground "#709870")
+       (rainbow-delimiters-depth-5-face     :short "rd-5"                :slug "rde" :foreground "#907373")
+       (rainbow-delimiters-depth-6-face     :short "rd-6"                :slug "rdf" :foreground "#6276ba")
+       (rainbow-delimiters-depth-7-face     :short "rd-7"                :slug "rdg" :foreground "#858580")
+       (rainbow-delimiters-depth-8-face     :short "rd-8"                :slug "rdh" :foreground "#80a880")
+       (rainbow-delimiters-depth-9-face     :short "rd-9"                :slug "rdi" :foreground "#887070"))))
+  "A collection of named style presets.
+
+This takes the form of an alist with theme names as the cars, with
+cdrs in the form of `engrave-faces-current-preset-style'."
+  :type '(alist
+          :key-type (symbol :tag "Theme name")
+          :value-type
+          (repeat
+           (cons (symbol :tag "Face")
+                 (plist :key-type (choice
+                                   (const :tag "Short identifier" :short)
+                                   (const :tag "Very short identifier" :slug)
+                                   (symbol :tag "Face attribute")
+                                   :tag "Property")
+                        :value-type (choice :tag "Value" string symbol)
+                        :tag "Face specification"))))
+  :group 'engrave-faces)
+
 (defvar engrave-faces-preset-missed-faces nil
   "Faces not found in `engrave-faces-current-preset-style'.")
 
 (defvar engrave-faces--backends nil)
 
-(define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
-
 ;;;###autoload
 (defmacro engrave-faces-define-backend (backend extension face-transformer &optional standalone-transformer view-setup)
   "Create a new engraving backend BACKEND.
-EXTENSION is the extension which will be used when writing engraved files.
-FACE-TRANSFORMER is the all important function which can be called with a
-list of faces and some content to apply those faces to and generate an output
-string accordingly.
-Should a pre/postable make sense for complete files using BACKEND, a
-STANDALONE-TRANSFORMER may be defined which operates on a buffer which has been
-generated by `engrave-faces-buffer' and is called after hooks.
-If STANDALONE-TRANSFORMER is given it will be used when directly creating a file,
-and cause a -standalone version of the buffer transforming function to be created."
+EXTENSION is the extension which will be used when writing
+engraved files. FACE-TRANSFORMER is the all important function
+which can be called with a list of faces and some content to
+apply those faces to and generate an output string accordingly.
+
+Should a pre/postable make sense for complete files using
+BACKEND, a STANDALONE-TRANSFORMER may be defined which operates
+on a buffer which has been generated by `engrave-faces-buffer'
+and is called after hooks.
+
+If STANDALONE-TRANSFORMER is given it will be used when directly
+creating a file, and cause a -standalone version of the buffer
+transforming function to be created."
   `(progn (add-to-list 'engrave-faces--backends
                        (list ,backend :face-transformer ,face-transformer :extension ,extension))
           (defun ,(intern (concat "engrave-faces-" backend "-buffer")) (&optional theme switch-to-result)
@@ -259,119 +376,6 @@ This function is lifted from htmlize."
   (delq nil (mapcar (lambda (o) (overlay-get o 'face)) (overlays-at pos))))
 
 ;;; Style helpers
-
-(defcustom engrave-faces-themes
-  '((default .
-      (;; faces.el --- excluding: bold, italic, bold-italic, underline, and some others
-       (default                             :short "default"             :slug "D"   :foreground "#000000" :background "#ffffff" :family "Monospace")
-       (variable-pitch                      :short "var-pitch"           :slug "vp"  :foreground "#000000"                       :family "Sans Serif")
-       (shadow                              :short "shadow"              :slug "h"   :foreground "#7f7f7f")
-       (success                             :short "success"             :slug "sc"  :foreground "#228b22" :weight bold)
-       (warning                             :short "warning"             :slug "w"   :foreground "#ff8e00" :weight bold)
-       (error                               :short "error"               :slug "e"   :foreground "#ff0000" :weight bold)
-       (link                                :short "link"                :slug "l"   :foreground "#ff0000")
-       (link-visited                        :short "link"                :slug "lv"  :foreground "#ff0000")
-       (highlight                           :short "link"                :slug "hi"  :foreground "#ff0000")
-       ;; font-lock.el
-       (font-lock-comment-face              :short "fl-comment"          :slug "c"   :foreground "#b22222")
-       (font-lock-comment-delimiter-face    :short "fl-comment-delim"    :slug "cd"  :foreground "#b22222")
-       (font-lock-string-face               :short "fl-string"           :slug "s"   :foreground "#8b2252")
-       (font-lock-doc-face                  :short "fl-doc"              :slug "d"   :foreground "#8b2252")
-       (font-lock-doc-markup-face           :short "fl-doc-markup"       :slug "m"   :foreground "#008b8b")
-       (font-lock-keyword-face              :short "fl-keyword"          :slug "k"   :foreground "#9370db")
-       (font-lock-builtin-face              :short "fl-builtin"          :slug "b"   :foreground "#483d8b")
-       (font-lock-function-name-face        :short "fl-function"         :slug "f"   :foreground "#0000ff")
-       (font-lock-variable-name-face        :short "fl-variable"         :slug "v"   :foreground "#a0522d")
-       (font-lock-type-face                 :short "fl-type"             :slug "t"   :foreground "#228b22")
-       (font-lock-constant-face             :short "fl-constant"         :slug "o"   :foreground "#008b8b")
-       (font-lock-warning-face              :short "fl-warning"          :slug "wr"  :foreground "#ff0000" :weight bold)
-       (font-lock-negation-char-face        :short "fl-neg-char"         :slug "nc")
-       (font-lock-preprocessor-face         :short "fl-preprocessor"     :slug "pp"  :foreground "#483d8b")
-       (font-lock-regexp-grouping-construct :short "fl-regexp"           :slug "rc"                        :weight bold)
-       (font-lock-regexp-grouping-backslash :short "fl-regexp-backslash" :slug "rb"                        :weight bold)
-       ;; org-faces.el
-       (org-block                           :short "org-block"           :slug "ob") ; forcing no background is preferable
-       (org-block-begin-line                :short "org-block-begin"     :slug "obb") ; forcing no background is preferable
-       (org-block-end-line                  :short "org-block-end"       :slug "obe") ; forcing no background is preferable
-       ;; outlines
-       (outline-1                           :short "outline-1"           :slug "Oa"  :foreground "#0000ff")
-       (outline-2                           :short "outline-2"           :slug "Ob"  :foreground "#a0522d")
-       (outline-3                           :short "outline-3"           :slug "Oc"  :foreground "#a020f0")
-       (outline-4                           :short "outline-4"           :slug "Od"  :foreground "#b22222")
-       (outline-5                           :short "outline-5"           :slug "Oe"  :foreground "#228b22")
-       (outline-6                           :short "outline-6"           :slug "Of"  :foreground "#008b8b")
-       (outline-7                           :short "outline-7"           :slug "Og"  :foreground "#483d8b")
-       (outline-8                           :short "outline-8"           :slug "Oh"  :foreground "#8b2252")
-       ;; highlight-numbers.el
-       (highlight-numbers-number            :short "hl-number"           :slug "hn"  :foreground "#008b8b")
-       ;; highlight-quoted.el
-       (highlight-quoted-quote              :short "hl-qquote"           :slug "hq"  :foreground "#9370db")
-       (highlight-quoted-symbol             :short "hl-qsymbol"          :slug "hs"  :foreground "#008b8b")
-       ;; rainbow-delimiters.el
-       (rainbow-delimiters-depth-1-face     :short "rd-1"                :slug "rda" :foreground "#707183")
-       (rainbow-delimiters-depth-2-face     :short "rd-2"                :slug "rdb" :foreground "#7388d6")
-       (rainbow-delimiters-depth-3-face     :short "rd-3"                :slug "rdc" :foreground "#909183")
-       (rainbow-delimiters-depth-4-face     :short "rd-4"                :slug "rdd" :foreground "#709870")
-       (rainbow-delimiters-depth-5-face     :short "rd-5"                :slug "rde" :foreground "#907373")
-       (rainbow-delimiters-depth-6-face     :short "rd-6"                :slug "rdf" :foreground "#6276ba")
-       (rainbow-delimiters-depth-7-face     :short "rd-7"                :slug "rdg" :foreground "#858580")
-       (rainbow-delimiters-depth-8-face     :short "rd-8"                :slug "rdh" :foreground "#80a880")
-       (rainbow-delimiters-depth-9-face     :short "rd-9"                :slug "rdi" :foreground "#887070"))))
-  "A collection of named style presets.
-
-This takes the form of an alist with theme names as the cars, with
-cdrs in the form of `engrave-faces-current-preset-style'."
-  :type '(alist
-          :key-type (symbol :tag "Theme name")
-          :value-type
-          (repeat
-           (cons (symbol :tag "Face")
-                 (plist :key-type (choice
-                                   (const :tag "Short identifier" :short)
-                                   (const :tag "Very short identifier" :slug)
-                                   (symbol :tag "Face attribute")
-                                   :tag "Property")
-                        :value-type (choice :tag "Value" string symbol)
-                        :tag "Face specification"))))
-  :group 'engrave-faces)
-
-(defcustom engrave-faces-current-preset-style
-  (alist-get 'default engrave-faces-themes)
-  "Overriding face values.
-
-This is constructed as an alist of faces, and their face attributes as a plist.
-For example, the \"default\" face could be specified by:
-
-  (default :foreground \"#000000\" :background \"#FFFFFF\")
-
-By setting :foreground, :background, etc. a certain theme can be
-set for the faces. The face attributes here will also be used
-when calculating inherited styles. Note that colours must be
-given in hexadecimal form.
-
-Faces here will represented more compactly when possible, by using the
-:short or :slug parameter to produce a named version styles,
-- :short should be a descriptive string comprised of the character class
-  [A-Za-z0-9-_]
-- :slug should be a compact string (i.e. as short as possible), comprised of the
-  character class [A-Za-Z]
-
-For example, for the \"default\" face,
-
-  (default :short \"def\" :slug \"D\"
-           :foreground \"#000000\" :background \"#FFFFFF\")
-
-Other faces will need to be styled explicitly each time they are used."
-  :type '(repeat
-          (cons (symbol :tag "Face")
-                (plist :key-type (choice
-                                  (const :tag "Short identifier" :short)
-                                  (const :tag "Very short identifier" :slug)
-                                  (symbol :tag "Face attribute")
-                                  :tag "Property")
-                       :value-type (choice :tag "Value" string symbol)
-                       :tag "Face specification")))
-  :group 'engrave-faces)
 
 (defun engrave-faces--check-nondefault (attr value)
   "Return VALUE as long as it is specified, and not the default for ATTR."
