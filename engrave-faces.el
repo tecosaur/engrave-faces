@@ -340,13 +340,14 @@ cdrs in the form of `engrave-faces-current-preset-style'."
   "Overriding face values.
 
 This is constructed as an alist of faces, and their face attributes as a plist.
-For example, the \"default\" face coud be specified by:
+For example, the \"default\" face could be specified by:
 
   (default :foreground \"#000000\" :background \"#FFFFFF\")
 
 By setting :foreground, :background, etc. a certain theme can be
 set for the faces. The face attributes here will also be used
-when calculating inherited styles.
+when calculating inherited styles. Note that colours must be
+given in hexadecimal form.
 
 Faces here will represented more compactly when possible, by using the
 :short or :slug parameter to produce a named version styles,
