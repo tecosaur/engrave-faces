@@ -42,31 +42,28 @@
 
 (defgroup engrave-faces nil
   "Export buffers with font-lock information to other formats."
-  :group 'hypermedia)
+  :group 'hypermedia
+  :prefix "engrave-faces-")
 
 (defcustom engrave-faces-attributes-of-interest
   '(:family :foreground :background :slant :weight :height :strike-through)
   "Attributes which sould be paid attention to."
-  :group 'engrave-faces
   :type '(repeat symbol))
 
 (defcustom engrave-faces-before-hook nil
   "Hook run before engraving a buffer.
 The hook functions are run in the source buffer (not the resulting buffer)."
-  :group 'engrave-faces
   :type 'hook)
 
 (defcustom engrave-faces-after-hook nil
   "Hook run after engraving a buffer.
 Unlike `engrave-faces-before-hook', these functions are run in the generated
 buffer.  You may use them to modify the outlook of the final output."
-  :group 'engrave-faces
   :type 'hook)
 
 (defcustom engrave-faces-log-preset-missed-faces nil
   "Whether to log faces not found in `engrave-faces-current-preset-style'."
-  :type 'boolean
-  :group 'engrave-faces)
+  :type 'boolean)
 
 (define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
 
@@ -142,8 +139,7 @@ cdrs in the form of `engrave-faces-current-preset-style'."
                                    (symbol :tag "Face attribute")
                                    :tag "Property")
                         :value-type (choice :tag "Value" string symbol)
-                        :tag "Face specification"))))
-  :group 'engrave-faces)
+                        :tag "Face specification")))))
 
 (defcustom engrave-faces-current-preset-style
   (alist-get 'default engrave-faces-themes)
