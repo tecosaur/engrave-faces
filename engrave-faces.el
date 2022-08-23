@@ -70,44 +70,6 @@ buffer.  You may use them to modify the outlook of the final output."
 
 (define-obsolete-variable-alias 'engrave-faces-preset-styles 'engrave-faces-current-preset-style "0.3")
 
-(defcustom engrave-faces-current-preset-style
-  (alist-get 'default engrave-faces-themes)
-  "Overriding face values.
-
-This is constructed as an alist of faces, and their face attributes as a plist.
-For example, the \"default\" face could be specified by:
-
-  (default :foreground \"#000000\" :background \"#FFFFFF\")
-
-By setting :foreground, :background, etc. a certain theme can be
-set for the faces. The face attributes here will also be used
-when calculating inherited styles. Note that colours must be
-given in hexadecimal form.
-
-Faces here will represented more compactly when possible, by using the
-:short or :slug parameter to produce a named version styles,
-- :short should be a descriptive string comprised of the character class
-  [A-Za-z0-9-_]
-- :slug should be a compact string (i.e. as short as possible), comprised of the
-  character class [A-Za-Z]
-
-For example, for the \"default\" face,
-
-  (default :short \"def\" :slug \"D\"
-           :foreground \"#000000\" :background \"#FFFFFF\")
-
-Other faces will need to be styled explicitly each time they are used."
-  :type '(repeat
-          (cons (symbol :tag "Face")
-                (plist :key-type (choice
-                                  (const :tag "Short identifier" :short)
-                                  (const :tag "Very short identifier" :slug)
-                                  (symbol :tag "Face attribute")
-                                  :tag "Property")
-                       :value-type (choice :tag "Value" string symbol)
-                       :tag "Face specification")))
-  :group 'engrave-faces)
-
 (defcustom engrave-faces-themes
   '((default .
       (;; faces.el --- excluding: bold, italic, bold-italic, underline, and some others
@@ -182,6 +144,43 @@ cdrs in the form of `engrave-faces-current-preset-style'."
                         :value-type (choice :tag "Value" string symbol)
                         :tag "Face specification"))))
   :group 'engrave-faces)
+
+(defcustom engrave-faces-current-preset-style
+  (alist-get 'default engrave-faces-themes)
+  "Overriding face values.
+
+This is constructed as an alist of faces, and their face attributes as a plist.
+For example, the \"default\" face could be specified by:
+
+  (default :foreground \"#000000\" :background \"#FFFFFF\")
+
+By setting :foreground, :background, etc. a certain theme can be
+set for the faces. The face attributes here will also be used
+when calculating inherited styles. Note that colours must be
+given in hexadecimal form.
+
+Faces here will represented more compactly when possible, by using the
+:short or :slug parameter to produce a named version styles,
+- :short should be a descriptive string comprised of the character class
+  [A-Za-z0-9-_]
+- :slug should be a compact string (i.e. as short as possible), comprised of the
+  character class [A-Za-Z]
+
+For example, for the \"default\" face,
+
+  (default :short \"def\" :slug \"D\"
+           :foreground \"#000000\" :background \"#FFFFFF\")
+
+Other faces will need to be styled explicitly each time they are used."
+  :type '(repeat
+          (cons (symbol :tag "Face")
+                (plist :key-type (choice
+                                  (const :tag "Short identifier" :short)
+                                  (const :tag "Very short identifier" :slug)
+                                  (symbol :tag "Face attribute")
+                                  :tag "Property")
+                       :value-type (choice :tag "Value" string symbol)
+                       :tag "Face specification"))))
 
 (defvar engrave-faces-preset-missed-faces nil
   "Faces not found in `engrave-faces-current-preset-style'.")
