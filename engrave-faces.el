@@ -291,6 +291,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
                                   (let ((prop (get-text-property (point) 'face)))
                                     (cond
                                      ((null prop) 'default)
+                                     ;; FIXME: Why/where/when does the `face'
+                                     ;; property take a value (quote X)?
                                      ((and (listp prop) (eq (car prop) 'quote))
                                       (eval prop t))
                                      (t prop)))
