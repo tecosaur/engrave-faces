@@ -147,7 +147,7 @@ Values are taken from https://docs.microsoft.com/en-us/typography/opentype/spec/
         width: max-content;
         white-space: pre-wrap;
         margin: auto; }\n"
-          (engrave-faces-html-gen-stylesheet "      ")
+          (engrave-faces-html-gen-stylesheet nil "      ")
           "
     </style>
   </head>
