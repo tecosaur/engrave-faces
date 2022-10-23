@@ -86,8 +86,16 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
              ?})
             " % " (symbol-name face))))
 
+(defun engrave-faces-latex--color (color)
+  "Convert COLOR loosely to a string of six hexadecimal digits."
+  (if (char-equal ?# (aref color 0))
+      (substring color 1 7)
+    (apply 'format "%02x%02x%02x"
+           (mapcar (lambda (c) (ash c -8))
+                   (color-values color)))))
+
 (defun engrave-faces-latex-face-apply (faces content)
-  "Convert each (compatable) parameter of FACES to a LaTeX command apllied to CONTENT."
+  "Convert attributes of FACES to LaTeX commands applied to CONTENT."
   (let ((attrs (engrave-faces-merge-attributes faces)))
     (let ((bg (plist-get attrs         :background))
           (fg (plist-get attrs         :foreground))
@@ -95,8 +103,10 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
           (bl (member (plist-get attrs :weight) '(bold extra-bold)))
           (st (plist-get attrs         :strike-through)))
       (concat
-       (when bg (concat "\\colorbox[HTML]{" (substring bg 1) "}{"))
-       (when fg (concat "\\textcolor[HTML]{" (substring fg 1) "}{"))
+       (when bg (concat "\\colorbox[HTML]{"
+                        (engrave-faces-latex--color bg) "}{"))
+       (when fg (concat "\\textcolor[HTML]{"
+                        (engrave-faces-latex--color fg) "}{"))
        (when st "\\sout{") (when bl "\\textbf{") (when it "\\textit{")
        content
        (when bg "}") (when fg "}") (when st "}") (when bl "}") (when it "}")))))
