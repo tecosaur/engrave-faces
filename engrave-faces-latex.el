@@ -150,11 +150,27 @@ When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
                #'engrave-faces-latex--protect-content-mathescape
              #'engrave-faces-latex--protect-content)
            content)))
-    (if (string-match-p "\\`[\n[:space:]]+\\'" content)
-        protected-content
-      (if (and style (eq engrave-faces-latex-output-style 'preset))
-          (concat "\\EF" (plist-get (cdr style) :slug) "{" protected-content "}")
-        (engrave-faces-latex-face-apply faces protected-content)))))
+    ;; Wrap groups of "words joined by blank characters" in LaTeX commands.
+    ;; Do not wrap newlines and other whitespace between those groups.
+    (let ((contains-blank-re
+           (rx (or (group (+ graph ) (* (+ blank) (+ graph)))
+                   (group (+ (any "\n" space))))))
+          (slug (and style
+                     (eq engrave-faces-latex-output-style 'preset)
+                     (plist-get (cdr style) :slug))))
+      (with-temp-buffer
+        (insert protected-content)
+        (goto-char (point-min))
+        (while (re-search-forward contains-blank-re nil t)
+          (replace-match
+           (concat
+            (and (match-string 1)
+                 (if (stringp slug)
+                     (format "\\EF%s{%s}" slug (match-string 1))
+                   (engrave-faces-latex-face-apply faces (match-string 1))))
+            (match-string 2))
+           t t))
+        (buffer-string)))))
 
 (defun engrave-faces-latex--post-processing ()
   "Set the initial text color and curly paren positioning.
