@@ -295,6 +295,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
                                      ;; property take a value (quote X)?
                                      ((and (listp prop) (eq (car prop) 'quote))
                                       (eval prop t))
+                                     ((and (consp prop) (keywordp (car prop)))
+                                      (list prop))
                                      (t prop)))
                                   text)
                          engraved-buf))
