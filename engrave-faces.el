@@ -335,18 +335,32 @@ I.e. ([facea :inherit faceb] facec) results in (facea faceb facec)"
 (defun engrave-faces-attribute-values (faces attribute)
   "Fetch all specified instances of ATTRIBUTE for FACES, ignoring inheritence.
 To consider inheritence, use `engrave-faces-explicit-inheritance' first."
-  (delq nil (delq 'unspecified
-                  (mapcar
-                   (lambda (face)
-                     (if-let ((style (cdr (assoc face engrave-faces-current-preset-style))))
-                         (plist-get style attribute)
-                       (cond
-                        ((symbolp face)
-                         (when engrave-faces-log-preset-missed-faces
-                           (push face engrave-faces-preset-missed-faces))
-                         (face-attribute face attribute nil nil))
-                        ((listp face) (plist-get face attribute)))))
-                   (delq 'default (if (listp faces) faces (list faces)))))))
+  (let ((face-list (delq 'default (if (listp faces) faces (list faces))))
+        values)
+    (dolist (face face-list)
+      (let* ((style (cdr (assoc face engrave-faces-current-preset-style)))
+             (raw-value
+              (if style (plist-get style attribute)
+                (cond
+                 ((symbolp face)
+                  (when engrave-faces-log-preset-missed-faces
+                    (push face engrave-faces-preset-missed-faces))
+                  (face-attribute face attribute nil nil))
+                 ((listp face) (plist-get face attribute)))))
+             (value
+              (cond
+               (style raw-value)
+               ((and (memq attribute '(:foreground :background))
+                     (stringp raw-value)
+                     (not (string-empty-p raw-value))
+                     (= ?# (aref raw-value 0)))
+                (apply 'format "#%02x%02x%02x"
+                       (mapcar (lambda (c) (ash c -8))
+                               (color-values raw-value))))
+               (t raw-value))))
+        (unless (memq value '(nil unspecified))
+          (push value values))))
+    (nreverse values)))
 
 (defun engrave-faces--next-face-change (pos &optional limit)
   "Find the next face change from POS up to LIMIT.
@@ -408,7 +422,9 @@ Unconditionally returns nil when FACES is default."
                                       (not (memq attr '(:height :strike-through)))))
                          (list attr
                                (if (and (memq attr '(:foreground :background))
-                                        (not (string-prefix-p "#" attr-val)))
+                                        (stringp attr-val)
+                                        (not (string-empty-p attr-val))
+                                        (= ?# (aref attr-val 0)))
                                    (apply 'format "#%02x%02x%02x"
                                           (mapcar (lambda (c) (ash c -8))
                                                   (color-values attr-val)))
