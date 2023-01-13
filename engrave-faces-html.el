@@ -27,7 +27,9 @@ When preset, CSS classes are generated for `engrave-faces-preset-styles'."
 
 (defun engrave-faces-html-gen-stylesheet (&optional theme indent)
   "Generate a preamble which provides short commands for the preset styles.
-See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
+See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'.
+When THEME is given, the style used is obtained from `engrave-faces-get-theme'.
+When INDENT is given, it is prepended to each line."
   (let ((stylesheet
          (mapconcat
           (lambda (face-style)
@@ -51,8 +53,8 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
           (engrave-faces-html--gen-style-css style "\n  ")
           " }"))
 
-(defun engrave-faces-html--gen-style-css (attrs seperator)
-  "Compose the relevant CSS styles to apply compatible ATTRS, seperated by SEPERATOR."
+(defun engrave-faces-html--gen-style-css (attrs &optional seperator)
+  "Compose CSS styles from ATTRS, seperated by a single space or SEPERATOR."
   (let ((fg    (plist-get attrs      :foreground))
         (bg    (plist-get attrs      :background))
         (st    (plist-get attrs      :strike-through))
@@ -71,7 +73,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'."
             (when it "text-decoration: italic;")
             (when wt (format "font-weight: %s;" (engrave-faces-html--css-weight wt)))
             (when (and ht (floatp ht)) (format "font-size: %sem" ht))))
-     seperator)))
+     (or " " seperator))))
 
 (defun engrave-faces-html--css-weight (weight)
   "Give the numerical CSS font WEIGHT.
@@ -91,6 +93,7 @@ Values are taken from https://docs.microsoft.com/en-us/typography/opentype/spec/
     ('black 900) ('heavy 900)))
 
 (defun engrave-faces-html--face-apply (faces content)
+  "Apply FACES to CONTENT."
   (let* ((attrs (engrave-faces-merge-attributes faces))
          (style (engrave-faces-html--gen-style-css attrs " ")))
     (if (string= style "")
@@ -98,6 +101,7 @@ Values are taken from https://docs.microsoft.com/en-us/typography/opentype/spec/
       (concat "<span style=\"" style "\">" content "</span>"))))
 
 (defun engrave-faces-html--protect-string (str)
+  "Protect interpreted characters in STR."
   (replace-regexp-in-string
    "<" "&lt;"
    (replace-regexp-in-string

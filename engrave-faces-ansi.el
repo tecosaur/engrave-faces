@@ -29,8 +29,9 @@ Possible values are:
   :group 'engrave-faces)
 
 (defcustom engrave-faces-ansi-use-face-colours t
-  "Whether to apply face colours"
-  :group 'engrave-faces)
+  "Whether to apply face colours."
+  :group 'engrave-faces
+  :type 'boolean)
 
 (defvar engrave-faces-ansi-face-nesting nil)
 
@@ -52,6 +53,8 @@ Possible values are:
 ;;;;; Color conversion
 
 (defun engrave-faces-ansi--color-to-ansi (color &optional background)
+  "Convert the color COLOR to an ANSI code.
+When BACKGROUND is non-nil, the provided ANSI code sets the background color."
   (if (eq color 'unspecified) nil
     (apply (pcase engrave-faces-ansi-color-mode
              ((or '3-bit '8-color) #'engrave-faces-ansi-color-3bit-code)
@@ -61,7 +64,8 @@ Possible values are:
            (append (mapcar (lambda (c) (/ c 257)) (color-values color)) (list background)))))
 
 (defun engrave-faces-ansi--color-dist-squared (reference rgb)
-  "Squared l2 distance between a REFERENCE and RBG values, each a list of 3 values (r g b)."
+  "Squared l2 distance between a REFERENCE and particular RGB value.
+REFERENCE and RGB should each be a list of three values (r g b)."
   (+ (* (nth 0 reference)
         (nth 0 rgb))
      (* (nth 1 reference)
@@ -73,24 +77,26 @@ Possible values are:
 
 (defvar engrave-faces-ansi--256-to-16-map
   '(0   1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
-        0   4  4  4 12 12  2  6  4  4 12 12  2  2  6  4
-        12 12  2  2  2  6 12 12 10 10 10 10 14 12 10 10
-        10 10 10 14  1  5  4  4 12 12  3  8  4  4 12 12
-        2   2  6  4 12 12  2  2  2  6 12 12 10 10 10 10
-        14 12 10 10 10 10 10 14  1  1  5  4 12 12  1  1
-        5   4 12 12  3  3  8  4 12 12  2  2  2  6 12 12
-        10 10 10 10 14 12 10 10 10 10 10 14  1  1  1  5
-        12 12  1  1  1  5 12 12  1  1  1  5 12 12  3  3
-        3   7 12 12 10 10 10 10 14 12 10 10 10 10 10 14
-        9   9  9  9 13 12  9  9  9  9 13 12  9  9  9  9
-        13 12  9  9  9  9 13 12 11 11 11 11  7 12 10 10
-        10 10 10 14  9  9  9  9  9 13  9  9  9  9  9 13
-        9   9  9  9  9 13  9  9  9  9  9 13  9  9  9  9
-        9  13 11 11 11 11 11 15  0  0  0  0  0  0  8  8
-        8   8  8  8  7  7  7  7  7  7 15 15 15 15 15 15))
+    0   4  4  4 12 12  2  6  4  4 12 12  2  2  6  4
+    12 12  2  2  2  6 12 12 10 10 10 10 14 12 10 10
+    10 10 10 14  1  5  4  4 12 12  3  8  4  4 12 12
+    2   2  6  4 12 12  2  2  2  6 12 12 10 10 10 10
+    14 12 10 10 10 10 10 14  1  1  5  4 12 12  1  1
+    5   4 12 12  3  3  8  4 12 12  2  2  2  6 12 12
+    10 10 10 10 14 12 10 10 10 10 10 14  1  1  1  5
+    12 12  1  1  1  5 12 12  1  1  1  5 12 12  3  3
+    3   7 12 12 10 10 10 10 14 12 10 10 10 10 10 14
+    9   9  9  9 13 12  9  9  9  9 13 12  9  9  9  9
+    13 12  9  9  9  9 13 12 11 11 11 11  7 12 10 10
+    10 10 10 14  9  9  9  9  9 13  9  9  9  9  9 13
+    9   9  9  9  9 13  9  9  9  9  9 13  9  9  9  9
+    9  13 11 11 11 11 11 15  0  0  0  0  0  0  8  8
+    8   8  8  8  7  7  7  7  7  7 15 15 15 15 15 15)
+  "A mapping from 256-color ANSI indicies to the closest 16-color number.")
 
 (defun engrave-faces-ansi-color-4bit-code (r g b &optional background)
-  "Convert the (R G B) colour code to a correspanding 4bit ansi escape sequence."
+  "Convert the (R G B) colour code to a correspanding 4bit ansi escape sequence.
+When BACKGROUND is non-nil, the provided ANSI code sets the background color."
   (format "\uE000[%sm"
           (pcase (nth (engrave-faces-ansi-color-rbg-to-256 r g b)
                       engrave-faces-ansi--256-to-16-map)
@@ -102,7 +108,8 @@ Possible values are:
 
 (defun engrave-faces-ansi-color-3bit-code (r g b &optional background)
   "Convert the (R G B) colour code to a correspanding 3bit ansi escape sequence.
-Brighter colours are induced via the addition of a bold code."
+Brighter colours are induced via the addition of a bold code.
+When BACKGROUND is non-nil, the provided ANSI code sets the background color."
   (format "\uE000[%sm"
           (pcase (nth (engrave-faces-ansi-color-rbg-to-256 r g b)
                       engrave-faces-ansi--256-to-16-map)
@@ -121,7 +128,8 @@ Brighter colours are induced via the addition of a bold code."
     (_ (/ (- value 35) 40))))
 
 (defun engrave-faces-ansi--color-8bit-code (r g b &optional background)
-  "Convert the (R G B) colour code to a correspanding 8bit ansi escape sequence."
+  "Convert the (R G B) colour code to a correspanding 8bit ansi escape sequence.
+When BACKGROUND is non-nil, the provided ANSI code sets the background color."
   (format (if background "\uE000[48;5;%dm" "\uE000[38;5;%dm")
           (engrave-faces-ansi-color-rbg-to-256 r g b)))
 
@@ -150,21 +158,26 @@ Brighter colours are induced via the addition of a bold code."
 ;;;;;; 24-bit / 16m-color
 
 (defun engrave-faces-ansi-color-24bit-code (r g b &optional background)
+  "Convert the (R G B) colour code to a correspanding 24bit ansi escape sequence.
+When BACKGROUND is non-nil, the provided ANSI code sets the background color."
   (format (if background "\uE000[48;2;%d;%d;%dm" "\uE000[38;2;%d;%d;%dm") r g b))
 
 ;;; Applying the transformation
 
 (defun engrave-faces-ansi--face-apply (faces content)
-  "TODO record faces, and use `engrave-faces-ansi-face-nesting' to diff properties
-with parent form more intelligent use of escape codes, and renewing properties which
-are collateral damage from \"[0m\"."
+  "Apply FACES to CONTENT."
+  ;; TODO record faces, and use `engrave-faces-ansi-face-nesting' to diff
+  ;; properties with parent form more intelligent use of escape codes, and
+  ;; renewing properties which are collateral damage from \"[0m\".
   (let* ((face-str (engrave-faces-ansi-code (engrave-faces-merge-attributes faces))))
     (concat face-str content (if (string= face-str "") "" "\uE000[0m"))))
 
 (defun engrave-faces-ansi--unescape-escape ()
-  (goto-char (point-min))
-  (while (re-search-forward "\uE000" nil t)
-    (replace-match "\e")))
+  "Unescape all escaped sequences in the current buffer."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "\uE000" nil t)
+      (replace-match "\e"))))
 
 (declare-function ansi-color-apply-on-region "ansi-color"
                   (begin end &optional preserve-sequences))

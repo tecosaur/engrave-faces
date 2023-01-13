@@ -13,6 +13,8 @@
 
 (require 'engrave-faces)
 
+(require 'cl-lib)
+
 (defcustom engrave-faces-latex-output-style 'preset
   "How to encode LaTeX style information.
 When nil, all face properties are applied via \\colorbox, \\textcolor,
@@ -49,7 +51,8 @@ standalone document."
 
 (defun engrave-faces-latex-gen-preamble (&optional theme)
   "Generate a preamble which provides short commands for the preset styles.
-See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
+See `engrave-faces-current-preset-style' and `engrave-faces-latex-output-style'.
+When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
   (let ((preset-style
          (if theme
              (engrave-faces-get-theme theme)
@@ -87,7 +90,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
             " % " (symbol-name face))))
 
 (defun engrave-faces-latex-face-apply (faces content)
-  "Convert each (compatable) parameter of FACES to a LaTeX command apllied to CONTENT."
+  "Convert the parameters of FACES to a LaTeX command applied to CONTENT."
   (let ((attrs (engrave-faces-merge-attributes faces)))
     (let ((bg (plist-get attrs         :background))
           (fg (plist-get attrs         :foreground))
@@ -107,6 +110,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
     ("~" . "\\char126{}")))
 
 (defun engrave-faces-latex--protect-content (content)
+  "Escape active characters in CONTENT."
   (replace-regexp-in-string
    (regexp-opt (mapcar #'car engrave-faces-latex--char-replacements))
    (lambda (char)
@@ -117,6 +121,7 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
    nil t))
 
 (defun engrave-faces-latex--protect-content-mathescape (content)
+  "Protect CONTENT, but leave inline maths unaffected."
   (let ((dollar-maths
          (and (memq engrave-faces-latex-mathescape '(t tex TeX))
               (string-match-p "\\$.+\\$" content)))
@@ -152,11 +157,12 @@ See `engrave-faces-preset-styles' and `engrave-faces-latex-output-style'."
         (engrave-faces-latex-face-apply faces protected-content)))))
 
 (defun engrave-faces-latex--post-processing ()
-  " Set the initial text color and curly paren positioning.
-Trailing curly parens are sometimes put on the next line, and need to be moved back."
+  "Set the initial text color and curly paren positioning.
+Trailing curly parens are sometimes put on the next line,
+and need to be moved back."
   (goto-char (point-min))
   (insert
-   (let ((style (cdr (assoc 'default engrave-faces-preset-styles))))
+   (let ((style (cdr (assoc 'default engrave-faces-current-preset-style))))
      (if (eq engrave-faces-latex-output-style 'preset)
          (format "\\color{EF%s}" (plist-get style :slug))
        (concat "\\color[HTML]{" (substring (plist-get style :foreground) 1) "}"))))

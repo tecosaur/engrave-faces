@@ -198,7 +198,10 @@ and is called after hooks.
 
 If STANDALONE-TRANSFORMER is given it will be used when directly
 creating a file, and cause a -standalone version of the buffer
-transforming function to be created."
+transforming function to be created.
+
+When a VIEW-SETUP function is provided, it is called just after
+switching to the result buffer."
   `(progn (add-to-list 'engrave-faces--backends
                        (list ,backend :face-transformer ,face-transformer :extension ,extension))
           (defun ,(intern (concat "engrave-faces-" backend "-buffer")) (&optional theme switch-to-result)
@@ -232,7 +235,7 @@ transforming function to be created."
           (defvar ,(intern (concat "engrave-faces-" backend "-after-hook")) nil)))
 
 (defun engrave-faces-file (in-file out-file backend &optional theme postprocessor)
-  "Using BACKEND, engrave IN-FILE and save it as FILE.EXTENSION.
+  "Using BACKEND, engrave IN-FILE and save it as OUT-FILE.
 If a POSTPROCESSOR function is provided, it is called before saving."
   (with-temp-buffer
     (insert-file-contents in-file)
@@ -244,7 +247,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
         (kill-buffer)))))
 
 (defun engrave-faces-buffer (backend &optional theme)
-  "Export the current buffer with BACKEND and return the created buffer."
+  "Export the current buffer with BACKEND and return the created buffer.
+When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
   (let ((engrave-faces-current-preset-style
          (if theme
              (engrave-faces-get-theme theme)
@@ -268,8 +272,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
                   (concat (file-name-nondirectory (buffer-file-name))
                           (plist-get (cdr (assoc backend engrave-faces--backends)) :extension))
                 (concat "*" backend "*"))))
-            (face-transformer (plist-get (cdr (assoc backend engrave-faces--backends)) :face-transformer))
-
+            (face-transformer
+             (plist-get (cdr (assoc backend engrave-faces--backends)) :face-transformer))
             (completed nil))
         (unwind-protect
             (let (next-change text)
@@ -311,7 +315,8 @@ If a POSTPROCESSOR function is provided, it is called before saving."
 
 (defun engrave-faces-merge-attributes (faces &optional attributes)
   "Find the final ATTRIBUTES for text with FACES."
-  (setq faces (engrave-faces-explicit-inheritance (if (listp faces) faces (list faces))))
+  (setq faces (engrave-faces-explicit-inheritance
+               (if (listp faces) faces (list faces))))
   (mapcan (lambda (attr)
             (list attr (car (engrave-faces-attribute-values faces attr))))
           (or attributes engrave-faces-attributes-of-interest)))
@@ -386,6 +391,7 @@ This function is lifted from htmlize."
     pos))
 
 (defun engrave-faces--overlay-faces-at (pos)
+  "Find all face overlay properties at POS."
   (delq nil (mapcar (lambda (o) (overlay-get o 'face)) (overlays-at pos))))
 
 ;;; Style helpers
@@ -401,8 +407,10 @@ This function is lifted from htmlize."
 Unconditionally returns nil when FACES is default."
   (pcase faces
     ('default nil)
-    ((pred symbolp) (assoc faces engrave-faces-preset-styles))
-    ((and (pred listp) (app length 1)) (assoc (car faces) engrave-faces-preset-styles))))
+    ((pred symbolp)
+     (assoc faces engrave-faces-preset-styles))
+    ((and (pred listp) (app length 1))
+     (assoc (car faces) engrave-faces-preset-styles))))
 
 (defun engrave-faces-generate-preset ()
   "Generate a preset style based on the current Emacs theme."
@@ -415,11 +423,13 @@ Unconditionally returns nil when FACES is default."
             (delq nil
                   (mapcar
                    (lambda (attr)
-                     (when-let ((attr-val (when (facep (car face-style))
-                                            (face-attribute (car face-style) attr nil t))))
-                       (when (or (engrave-faces--check-nondefault attr attr-val)
-                                 (and (eq (car face-style) 'default)
-                                      (not (memq attr '(:height :strike-through)))))
+                     (let ((attr-val
+                            (and (facep (car face-style))
+                                 (face-attribute (car face-style) attr nil t))))
+                       (when (and attr-val
+                                  (or (engrave-faces--check-nondefault attr attr-val)
+                                      (and (eq (car face-style) 'default)
+                                           (not (memq attr '(:height :strike-through))))))
                          (list attr
                                (if (and (memq attr '(:foreground :background))
                                         (stringp attr-val)
@@ -455,7 +465,7 @@ The theme t is treated as shorthand for the current theme."
           (unless noput
             (push (cons theme spec) engrave-faces-themes))
           spec)
-      (user-error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes." theme))))
+      (user-error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes" theme))))
 
 (defun engrave-faces-use-theme (&optional theme insert-def)
   "Select a THEME an apply it as the current engraved preset style.
@@ -465,7 +475,7 @@ current buffer at point."
   (interactive (list (intern
                       (completing-read
                        "Theme: "
-                       (cl-remove-duplicates
+                       (delete-dups
                         (append
                          (mapcar
                           (lambda (theme)
