@@ -358,7 +358,7 @@ To consider inheritence, use `engrave-faces-explicit-inheritance' first."
                ((and (memq attribute '(:foreground :background))
                      (stringp raw-value)
                      (not (string-empty-p raw-value))
-                     (= ?# (aref raw-value 0)))
+                     (not (= ?# (aref raw-value 0))))
                 (apply 'format "#%02x%02x%02x"
                        (mapcar (lambda (c) (ash c -8))
                                (color-values raw-value))))
@@ -434,7 +434,7 @@ Unconditionally returns nil when FACES is default."
                                (if (and (memq attr '(:foreground :background))
                                         (stringp attr-val)
                                         (not (string-empty-p attr-val))
-                                        (= ?# (aref attr-val 0)))
+                                        (not (= ?# (aref attr-val 0))))
                                    (apply 'format "#%02x%02x%02x"
                                           (mapcar (lambda (c) (ash c -8))
                                                   (color-values attr-val)))
