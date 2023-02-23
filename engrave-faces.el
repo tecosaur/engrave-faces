@@ -123,7 +123,24 @@ buffer.  You may use them to modify the outlook of the final output."
        (rainbow-delimiters-depth-6-face     :short "rd-6"                :slug "rdf" :foreground "#6276ba")
        (rainbow-delimiters-depth-7-face     :short "rd-7"                :slug "rdg" :foreground "#858580")
        (rainbow-delimiters-depth-8-face     :short "rd-8"                :slug "rdh" :foreground "#80a880")
-       (rainbow-delimiters-depth-9-face     :short "rd-9"                :slug "rdi" :foreground "#887070"))))
+       (rainbow-delimiters-depth-9-face     :short "rd-9"                :slug "rdi" :foreground "#887070")
+       ;; ansi-color
+       (ansi-color-yellow                   :short "ansi-yellow"         :slug "any" :foreground "#CDCD00")
+       (ansi-color-red                      :short "ansi-red"            :slug "anr" :foreground "#CD0000")
+       (ansi-color-black                    :short "ansi-black"          :slug "anb" :foreground "#000000")
+       (ansi-color-green                    :short "ansi-green"          :slug "ang" :foreground "#00CD00")
+       (ansi-color-blue                     :short "ansi-blue"           :slug "anB" :foreground "#0000EE")
+       (ansi-color-cyan                     :short "ansi-cyan"           :slug "anc" :foreground "#00CDCD")
+       (ansi-color-white                    :short "ansi-white"          :slug "anw" :foreground "#E5E5E5")
+       (ansi-color-magenta                  :short "ansi-magenta"        :slug "anm" :foreground "#CD00CD")
+       (ansi-color-bright-yellow            :short "ansi-bright-yellow"  :slug "ANy" :foreground "#EEEE00")
+       (ansi-color-bright-red               :short "ansi-bright-red"     :slug "ANr" :foreground "#EE0000")
+       (ansi-color-bright-black             :short "ansi-bright-black"   :slug "ANb" :foregroun  "#4D4D4D")
+       (ansi-color-bright-green             :short "ansi-bright-green"   :slug "ANg" :foreground "#00EE00")
+       (ansi-color-bright-blue              :short "ansi-bright-blue"    :slug "ANB" :foreground "#0000FF")
+       (ansi-color-bright-cyan              :short "ansi-bright-cyan"    :slug "ANc" :foreground "#00EEEE")
+       (ansi-color-bright-white             :short "ansi-bright-white"   :slug "ANw" :foregroun  "#FFFFFF")
+       (ansi-color-bright-magenta           :short "ansi-bright-magenta" :slug "ANm" :foregroun  "#EE00EE"))))
   "A collection of named style presets.
 
 This takes the form of an alist with theme names as the cars, with
