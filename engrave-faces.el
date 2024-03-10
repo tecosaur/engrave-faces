@@ -312,12 +312,12 @@ When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
                                   (let ((prop (get-text-property (point) 'face)))
                                     (cond
                                      ((null prop) 'default)
+                                     ((and (consp prop) (keywordp (car prop)))
+                                      (list prop))
                                      ;; FIXME: Why/where/when does the `face'
                                      ;; property take a value (quote X)?
                                      ((and (listp prop) (eq (car prop) 'quote))
                                       (eval prop t))
-                                     ((and (consp prop) (keywordp (car prop)))
-                                      (list prop))
                                      (t prop)))
                                   text)
                          engraved-buf))
@@ -425,9 +425,9 @@ Unconditionally returns nil when FACES is default."
   (pcase faces
     ('default nil)
     ((pred symbolp)
-     (assoc faces engrave-faces-preset-styles))
+     (assoc faces engrave-faces-current-preset-style))
     ((and (pred listp) (app length 1))
-     (assoc (car faces) engrave-faces-preset-styles))))
+     (assoc (car faces) engrave-faces-current-preset-style))))
 
 (defun engrave-faces-generate-preset ()
   "Generate a preset style based on the current Emacs theme."
@@ -457,7 +457,7 @@ Unconditionally returns nil when FACES is default."
                                                   (color-values attr-val)))
                                  attr-val)))))
                    engrave-faces-attributes-of-interest))))
-   engrave-faces-preset-styles))
+   engrave-faces-current-preset-style))
 
 (defun engrave-faces-get-theme (theme &optional noput)
   "Obtain the preset style for THEME.

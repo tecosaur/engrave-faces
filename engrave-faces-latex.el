@@ -19,8 +19,8 @@
   "How to encode LaTeX style information.
 When nil, all face properties are applied via \\colorbox, \\textcolor,
 \\textbf, etc. each time.
-When preset, short commands are generated for `engrave-faces-preset-styles'."
   :type '(choice nil preset)
+When preset, short commands are generated for `engrave-faces-current-preset-style'."
   :group 'engrave-faces)
 
 (defcustom engrave-faces-latex-mathescape nil

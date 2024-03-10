@@ -16,7 +16,7 @@
 (defcustom engrave-faces-html-output-style 'preset
   "How to encode HTML style information.
 When nil, all face properties are applied via inline styles.
-When preset, CSS classes are generated for `engrave-faces-preset-styles'."
+When preset, CSS classes are generated for `engrave-faces-current-preset-style'."
   :type '(choice nil preset)
   :group 'engrave-faces)
 
@@ -27,7 +27,7 @@ When preset, CSS classes are generated for `engrave-faces-preset-styles'."
 
 (defun engrave-faces-html-gen-stylesheet (&optional theme indent)
   "Generate a preamble which provides short commands for the preset styles.
-See `engrave-faces-preset-styles' and `engrave-faces-html-output-style'.
+See `engrave-faces-current-preset-style' and `engrave-faces-html-output-style'.
 When THEME is given, the style used is obtained from `engrave-faces-get-theme'.
 When INDENT is given, it is prepended to each line."
   (let ((stylesheet
