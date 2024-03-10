@@ -2,13 +2,13 @@
 
 ;; Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
-;; Author: TEC <https://git.tecosaur.net/>
+;; Author: TEC <https://code.tecosaur.net/>
 ;; Maintainer: TEC <contact@tecosaur.net>
 ;; Created: January 18, 2021
 ;; Modified: July 10, 2021
 ;; Version: 0.3.1
 ;; Keywords: faces
-;; Homepage: https://github.com/tecosaur/engrave-faces
+;; Homepage: https://code.tecosaur.net/tec/engrave-faces
 ;; Package-Requires: ((emacs "27.1"))
 
 ;;; License:
