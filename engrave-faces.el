@@ -465,24 +465,23 @@ Unless NOPUT is non-nil, the preset will be added to `engrave-faces-themes'.
 The theme t is treated as shorthand for the current theme."
   (when (eq theme t)
     (setq theme (car custom-enabled-themes)))
-  (if-let ((theme-preset (alist-get theme engrave-faces-themes)))
-      theme-preset
-    (if (or (eq theme (car custom-enabled-themes))
-            (memq theme (custom-available-themes)))
-        (let ((spec
-               (if (eq theme (car custom-enabled-themes))
-                   (engrave-faces-generate-preset)
-                 (let ((old-theme (car custom-enabled-themes))
-                       spec)
-                   (load-theme theme t)
-                   (setq spec (engrave-faces-generate-preset))
-                   (load-theme old-theme t)
-                   (redraw-display)
-                   spec))))
-          (unless noput
-            (push (cons theme spec) engrave-faces-themes))
-          spec)
-      (user-error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes" theme))))
+  (or (alist-get theme engrave-faces-themes)
+      (if (or (eq theme (car custom-enabled-themes))
+              (memq theme (custom-available-themes)))
+          (let ((spec
+                 (if (eq theme (car custom-enabled-themes))
+                     (engrave-faces-generate-preset)
+                   (let ((old-theme (car custom-enabled-themes))
+                         spec)
+                     (load-theme theme t)
+                     (setq spec (engrave-faces-generate-preset))
+                     (load-theme old-theme t)
+                     (redraw-display)
+                     spec))))
+            (unless noput
+              (push (cons theme spec) engrave-faces-themes))
+            spec)
+        (user-error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes" theme))))
 
 (defun engrave-faces-use-theme (&optional theme insert-def)
   "Select a THEME an apply it as the current engraved preset style.
