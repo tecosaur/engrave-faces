@@ -544,7 +544,7 @@ The theme t is treated as shorthand for the current theme."
             (unless noput
               (push (cons theme spec) engrave-faces-themes))
             spec)
-        (user-error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes" theme))))
+        (error "Theme `%s' is not found in `engrave-faces-current-preset-style' or availible Emacs themes" theme))))
 
 (defun engrave-faces-use-theme (&optional theme insert-def)
   "Select a THEME an apply it as the current engraved preset style.
