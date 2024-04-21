@@ -268,8 +268,13 @@ switching to the result buffer."
             (engrave-faces-file file out-file ,backend theme ,standalone-transformer)
             (when open-result (find-file out-file))
             out-file)
-          (defvar ,(intern (concat "engrave-faces-" backend "-before-hook")) nil)
-          (defvar ,(intern (concat "engrave-faces-" backend "-after-hook")) nil)))
+          (defvar ,(intern (concat "engrave-faces-" backend "-before-hook")) nil
+            ,(format "Hooks run after `engrave-faces-before-hook' when using the %s backend"
+                     backend))
+          (defvar ,(intern (concat "engrave-faces-" backend "-after-hook")) nil
+            ,(format "Hooks to be run after `engrave-faces-after-hook' when using the %s backend.\n\
+                      Each hook function is run with a list of the styles used as the argument."
+                     backend))))
 
 (defun engrave-faces-file (in-file out-file backend &optional theme postprocessor)
   "Using BACKEND, engrave IN-FILE and save it as OUT-FILE.
