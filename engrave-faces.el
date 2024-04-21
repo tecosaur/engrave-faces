@@ -195,6 +195,26 @@ Other faces will need to be styled explicitly each time they are used."
                        :value-type (choice :tag "Value" string symbol)
                        :tag "Face specification"))))
 
+(defvar engrave-faces-dynamic-style nil
+  "A dynamic equivalent of `engrave-faces-current-preset-style'.
+Used with dynamic theme modes, on a per-backend basis.")
+
+(defcustom engrave-faces-slug-function #'engrave-faces-make-slug
+  "Function used to generate a :slug from a face name (symbol).
+To be compatible with LaTeX, the slug must only use characters in [A-Za-z].  To
+balance this concern with the value of brevity, FACE-SYMBOL is split on hyphens,
+and turned into a lower-case acronym. Then, \"x\"s are appended until the slug
+is unique.
+
+The generated slug should also be unique in `engrave-faces-dynamic-style'."
+  :type 'function)
+
+(defcustom engrave-faces-short-function nil
+  "Function used to generate a :short name from a face name (symbol).
+Defaults to the value of `engrave-faces-slug-function'.
+The generated short name should also be unique in `engrave-faces-dynamic-style'."
+  :type '(choice function (const nil)))
+
 (defvar engrave-faces-preset-missed-faces nil
   "Faces not found in `engrave-faces-current-preset-style'.")
 
@@ -266,6 +286,7 @@ If a POSTPROCESSOR function is provided, it is called before saving."
 (defun engrave-faces-buffer (backend &optional theme)
   "Export the current buffer with BACKEND and return the created buffer.
 When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
+  (setq engrave-faces-dynamic-style nil)
   (let ((engrave-faces-current-preset-style
          (if theme
              (engrave-faces-get-theme theme)
@@ -419,15 +440,57 @@ This function is lifted from htmlize."
               (eq value 'unspecified))
     value))
 
-(defun engrave-faces-preset-style (faces)
+(defun engrave-faces-preset-style (faces &optional dynamic-theme-p)
   "Return the preset style for FACES, should it exist.
-Unconditionally returns nil when FACES is default."
-  (pcase faces
-    ('default nil)
-    ((pred symbolp)
-     (assoc faces engrave-faces-current-preset-style))
-    ((and (pred listp) (app length 1))
-     (assoc (car faces) engrave-faces-current-preset-style))))
+Unconditionally returns nil when FACES is default.
+
+DYNAMIC-THEME-P specifies whether `engrave-faces-dynamic-style'
+should be used."
+  (when-let ((face (cond
+                    ((symbolp faces) faces)
+                    ((and (listp faces) (= (length faces) 1))
+                     (car faces)))))
+    (cond
+     ((eq face 'default)
+      (unless (or (not dynamic-theme-p) (assoc face engrave-faces-dynamic-style))
+        (push (engrave-faces--generate-style face)
+              engrave-faces-dynamic-style)
+        nil))
+     (dynamic-theme-p
+      (or (assoc face engrave-faces-dynamic-style)
+          (car (push (engrave-faces--generate-style face)
+                     engrave-faces-dynamic-style))))
+     (t (assoc face engrave-faces-current-preset-style)))))
+
+(defun engrave-faces--generate-style (face)
+  "Generate and return a style declaration for FACE."
+  (or (assoc face engrave-faces-current-preset-style)
+      (let ((attrs (mapcan
+                    (lambda (attr)
+                      (list attr (car (engrave-faces-attribute-values face attr))))
+                    engrave-faces-attributes-of-interest))
+            (slug (funcall engrave-faces-slug-function face)))
+        (plist-put attrs :slug slug)
+        (plist-put attrs :short (if engrave-faces-short-function
+                                    (funcall engrave-faces-short-function face)
+                                  slug))
+        (cons face attrs))))
+
+(defun engrave-faces-make-slug (face-symbol)
+  "Create a slug for FACE-SYMBOL, unique in `engrave-faces-dynamic-style'.
+See `engrave-faces-slug-function' for more information."
+  (let ((slug
+         (mapconcat
+          (lambda (word) (char-to-string (aref word 0)))
+          (split-string (symbol-name face-symbol) "-")))
+        (existing-slugs
+         (mapcar
+          (lambda (style)
+            (plist-get (cdr style) :slug))
+          engrave-faces-dynamic-style)))
+    (while (member slug existing-slugs)
+      (setq slug (concat slug "x")))
+    slug))
 
 (defun engrave-faces-generate-preset ()
   "Generate a preset style based on the current Emacs theme."

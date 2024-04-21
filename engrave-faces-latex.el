@@ -12,15 +12,20 @@
 ;;; Code:
 
 (require 'engrave-faces)
-
 (require 'cl-lib)
+
+(defvar engrave-faces-current-face-styles)
+(defvar engrave-faces-dynamic-style)
 
 (defcustom engrave-faces-latex-output-style 'preset
   "How to encode LaTeX style information.
 When nil, all face properties are applied via \\colorbox, \\textcolor,
 \\textbf, etc. each time.
-  :type '(choice nil preset)
-When preset, short commands are generated for `engrave-faces-current-preset-style'."
+When preset, short commands are generated for
+`engrave-faces-current-preset-style'."
+  :type '(choice (const nil :tag "Create no style commands in the preamble")
+          (const preset :tag "Create a preset collection of style commands in the preamble")
+          (const dynamic :tag "Dynamicly generate style commands in the preamble"))
   :group 'engrave-faces)
 
 (defcustom engrave-faces-latex-mathescape nil
@@ -53,18 +58,21 @@ standalone document."
   "Generate a preamble which provides short commands for the preset styles.
 See `engrave-faces-current-preset-style' and `engrave-faces-latex-output-style'.
 When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
-  (let ((preset-style
-         (if theme
-             (engrave-faces-get-theme theme)
-           engrave-faces-current-preset-style)))
+  (let ((face-styles
+         (cond
+          ((and theme (symbolp theme))
+           (engrave-faces-get-theme theme))
+          ((consp theme)
+           theme)
+          (t engrave-faces-current-preset-style))))
     (concat
      (unless (cl-notany (lambda (s) (plist-get (cdr s) :background))
-                        preset-style)
+                        face-styles)
        (format "\\newcommand\\efstrut{%s}\n" engrave-faces-latex-colorbox-strut))
      (mapconcat
       (lambda (face-style)
         (engrave-faces-latex-gen-preamble-line (car face-style) (cdr face-style)))
-      preset-style
+      face-styles
       "\n"))))
 
 (defun engrave-faces-latex-gen-preamble-line (face style)
@@ -142,7 +150,8 @@ When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
 
 (defun engrave-faces-latex-face-mapper (faces content)
   "Create a LaTeX representation of CONTENT With FACES applied."
-  (let* ((style (engrave-faces-preset-style faces))
+  (let* ((style (engrave-faces-preset-style
+                 faces (eq engrave-faces-latex-output-style 'dynamic)))
          (protected-content
           (funcall
            (if (and engrave-faces-latex-mathescape
@@ -156,7 +165,7 @@ When THEME is given, the style used is obtained from `engrave-faces-get-theme'."
            (rx (or (group (+ graph ) (* (+ blank) (+ graph)))
                    (group (+ (any "\n" space))))))
           (slug (and style
-                     (eq engrave-faces-latex-output-style 'preset)
+                     (memq engrave-faces-latex-output-style '(preset dynamic))
                      (plist-get (cdr style) :slug))))
       (with-temp-buffer
         (insert protected-content)
@@ -179,7 +188,7 @@ and need to be moved back."
   (goto-char (point-min))
   (insert
    (let ((style (cdr (assoc 'default engrave-faces-current-preset-style))))
-     (if (eq engrave-faces-latex-output-style 'preset)
+     (if (memq engrave-faces-latex-output-style '(preset dynamic))
          (format "\\color{EF%s}" (plist-get style :slug))
        (concat "\\color[HTML]{" (substring (plist-get style :foreground) 1) "}"))))
   (goto-char (point-min))
@@ -197,7 +206,9 @@ and need to be moved back."
 \\usepackage{fvextra}
 \\usepackage{sourcecodepro}
 \\pagestyle{empty}\n\n"
-          (engrave-faces-latex-gen-preamble)
+          (engrave-faces-latex-gen-preamble
+           (and (eq engrave-faces-latex-output-style 'dynamic)
+                engrave-faces-dynamic-style))
           "
 \\begin{document}\n"
           (let ((default-face

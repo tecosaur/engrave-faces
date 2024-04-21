@@ -17,7 +17,9 @@
   "How to encode HTML style information.
 When nil, all face properties are applied via inline styles.
 When preset, CSS classes are generated for `engrave-faces-current-preset-style'."
-  :type '(choice nil preset)
+  :type '(choice (const nil :tag "Create no <style> elements")
+          (const preset :tag "Create a <style> element based on the preset style")
+          (const dynamic :tag "Create a dynamic <style> element for faces used"))
   :group 'engrave-faces)
 
 (defcustom engrave-faces-html-class-prefix "ef-"
@@ -30,20 +32,19 @@ When preset, CSS classes are generated for `engrave-faces-current-preset-style'.
 See `engrave-faces-current-preset-style' and `engrave-faces-html-output-style'.
 When THEME is given, the style used is obtained from `engrave-faces-get-theme'.
 When INDENT is given, it is prepended to each line."
-  (let ((stylesheet
-         (mapconcat
-          (lambda (face-style)
-            (engrave-faces-html--gen-stylesheet-entry (car face-style) (cdr face-style)))
-          (if theme
-              (engrave-faces-get-theme theme)
-            engrave-faces-current-preset-style)
-          "\n")))
-    (if indent
-        (mapconcat (lambda (line)
-                     (concat indent line))
-                   (split-string stylesheet "\n")
-                   "\n")
-      stylesheet)))
+  (let ((face-styles
+         (cond
+          ((and theme (symbolp theme))
+           (engrave-faces-get-theme theme))
+          ((consp theme)
+           theme)
+          (t engrave-faces-current-preset-style))))
+    (mapconcat
+     (lambda (face-style)
+       (concat indent (engrave-faces-html--gen-stylesheet-entry
+                       (car face-style) (cdr face-style))))
+     face-styles
+     "\n")))
 
 (defun engrave-faces-html--gen-stylesheet-entry (face style)
   "Generate a HTML preamble line for STYLE representing FACE."
@@ -113,10 +114,11 @@ Values are taken from https://docs.microsoft.com/en-us/typography/opentype/spec/
 (defun engrave-faces-html--face-mapper (faces content)
   "Create a HTML representation of CONTENT With FACES applied."
   (let ((protected-content (engrave-faces-html--protect-string content))
-        (style (engrave-faces-preset-style faces)))
+        (style (engrave-faces-preset-style
+                faces (eq engrave-faces-html-output-style 'dynamic))))
     (if (string-match-p "\\`[\n[:space:]]+\\'" content)
         protected-content
-      (if (and style (eq engrave-faces-html-output-style 'preset))
+      (if (and style (memq engrave-faces-html-output-style '(preset dynamic)))
           (concat "<span class=\"" engrave-faces-html-class-prefix
                   (plist-get (cdr style) :slug) "\">"
                   protected-content "</span>")
